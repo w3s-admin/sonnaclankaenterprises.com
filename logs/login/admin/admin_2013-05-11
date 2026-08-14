@@ -1,0 +1,11 @@
+10:16:48 (admin_logout) LOG OUT Admin ( LOGIN:Saturday 11th of May 2013 08:37:57 AM  LOGOUT:2013-05-11 10:16:48  ip : 112.134.146.119 ,  Browser : Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, Admin ID : 1 Admin Name : admin )
+01:08:18 (index) ip : 112.134.146.184 ,  Browser : Mozilla/5.0 (Windows NT 6.1; rv:14.0) Gecko/20100101 Firefox/14.0.1, User Name : kanishka , User ID : 6
+01:26:46 (index) ip : 112.134.146.184 ,  Browser : Mozilla/5.0 (Windows NT 6.1; rv:14.0) Gecko/20100101 Firefox/14.0.1, User Name : kanishka , User ID : 6
+02:24:18 (index) ip : 112.134.146.184 ,  Browser : Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, User Name : kanishka , User ID : 6
+03:20:26 (index) ip : 112.134.146.119 ,  Browser : Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) Gecko/20100101 Firefox/11.0, User Name : chaminda , User ID : 5
+03:23:15 (index) ip : 112.134.146.119 ,  Browser : Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) Gecko/20100101 Firefox/11.0, User Name : chaminda , User ID : 5
+04:19:43 (index) ip : 112.134.146.119 ,  Browser : Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, User Name : admin , User ID : 1
+08:25:24 (index) ip : 103.247.50.162 ,  Browser : Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, User Name : admin , User ID : 1
+19:55:49 (admin_logout) LOG OUT Admin ( LOGIN:Saturday 11th of May 2013 03:49:43 PM  LOGOUT:2013-05-11 19:55:49  ip : 103.247.50.162 ,  Browser : Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, Admin ID : 1 Admin Name : admin )
+21:36:34 (index) ip : 103.247.48.137 ,  Browser : Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, User Name : admin , User ID : 1
+22:53:00 (index) ip : 103.247.50.158 ,  Browser : Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31, User Name : admin , User ID : 1

@@ -1,0 +1,30 @@
+RewriteEngine  on
+ 
+RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/(.*).html$ vehicle.php?vid=$1
+RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/images/(.*)$  images/$2
+RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/css/(.*)$  css/$2
+RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/img/(.*)$  img/$2
+RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/js/(.*)$  js/$2
+RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/font/(.*)$  font/$2
+
+
+RewriteRule ^used-japanese-vehicle-view/(.*)/(.*).html$ vehicle_view.php?vid=$1
+RewriteRule ^used-japanese-vehicle-view/(.*)/images/(.*)$  images/$2
+RewriteRule ^used-japanese-vehicle-view/(.*)/css/(.*)$  css/$2
+RewriteRule ^used-japanese-vehicle-view/(.*)/styles/(.*)$  styles/$2
+RewriteRule ^used-japanese-vehicle-view/(.*)/js/(.*)$  js/$2
+
+
+RewriteRule ^inquiry/(.*)/(.*).html$ inquiry.php?vid=$1
+RewriteRule ^inquiry/(.*)/images/(.*)$  images/$2
+RewriteRule ^inquiry/(.*)/css/(.*)$  css/$2
+RewriteRule ^inquiry/(.*)/styles/(.*)$  styles/$2
+RewriteRule ^inquiry/(.*)/js/(.*)$  js/$2
+RewriteRule ^inquiry/(.*)/flash/(.*)$  flash/$2
+
+RewriteRule ^negotiate/(.*)/(.*).html$ negotiate.php?vid=$1
+RewriteRule ^negotiate/(.*)/images/(.*)$  images/$2
+RewriteRule ^negotiate/(.*)/css/(.*)$  css/$2
+RewriteRule ^negotiate/(.*)/styles/(.*)$  styles/$2
+RewriteRule ^negotiate/(.*)/js/(.*)$  js/$2
+RewriteRule ^negotiate/(.*)/flash/(.*)$  flash/$2

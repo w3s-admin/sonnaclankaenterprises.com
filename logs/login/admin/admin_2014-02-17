@@ -1,0 +1,8 @@
+03:34:28 (index) ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0), User Name : admin , User ID : 1
+03:35:55 (index) ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (iPhone; CPU iPhone OS 7_0_4 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11B554a Safari/9537.53, User Name : admin , User ID : 1
+16:06:48 (admin_logout) LOG OUT Admin ( LOGIN:Monday 17th of February 2014 04:04:28 PM  LOGOUT:2014-02-17 16:06:48  ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (iPhone; CPU iPhone OS 7_0_4 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11B554a Safari/9537.53, Admin ID : 1 Admin Name : admin )
+03:37:10 (index) ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (iPhone; CPU iPhone OS 7_0_4 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11B554a Safari/9537.53, User Name : admin , User ID : 1
+03:37:23 (index) ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0), User Name : admin , User ID : 1
+16:27:23 (admin_logout) LOG OUT Admin ( LOGIN:Monday 17th of February 2014 04:07:10 PM  LOGOUT:2014-02-17 16:27:23  ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0), Admin ID : 1 Admin Name : admin )
+16:27:34 (admin_logout) LOG OUT Admin ( LOGIN:  LOGOUT:2014-02-17 16:27:33  ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0), Admin ID :  Admin Name :  )
+16:27:35 (admin_logout) LOG OUT Admin ( LOGIN:  LOGOUT:2014-02-17 16:27:35  ip : 119.105.220.236 ,  Browser : Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0), Admin ID :  Admin Name :  )

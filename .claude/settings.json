@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r ' *)",
+      "Bash(mkdir -p \"/c/Projects Github/sonnaclankaenterprises.com/assets/img/logo\")",
+      "Bash(cp \"/c/Projects Github/sonnaclankaenterprises.com/systemadmin/images/new/logo/sonnac_logo.png\" \"/c/Projects Github/sonnaclankaenterprises.com/assets/img/logo/sonnac-lanka-logo.png\")"
+    ]
+  }
+}
