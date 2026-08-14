@@ -122,7 +122,7 @@ $id = $id ?? null;
 
                     <div class="heading">
 
-                        <h3>Create Task for User(s)</h3>                    
+                        <h3>Vehicle Manager</h3>
 
                         <div class="resBtnSearch">
                             <a href="#"><span class="icon16 icomoon-icon-search-3"></span></a>
@@ -142,7 +142,7 @@ $id = $id ?? null;
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">Create Task</li>
+                            <li class="active">Vehicle Manager</li>
                         </ul>
 
                     </div><!-- End .heading-->
@@ -158,7 +158,7 @@ $id = $id ?? null;
 
                                     <h4>
                                         <span class="icon16 icomoon-icon-equalizer-2"></span>
-                                        <span>Property Filters</span>
+                                        <span>Filter Vehicles</span>
                                     </h4>
                                     <a class="minimize" href="#" style="display: none;">Minimize</a>
                                 </div>

@@ -128,6 +128,28 @@ $Options = $Options ?? null;
 
                 });
 
+                // Motor Bicycle support: switching Type re-filters Make and Body Type
+                // to only show options tagged for that vehicle group (car vs motorcycle).
+                $("#vtype").change(function() {
+                    var isMotorcycle = $(this).find(":selected").text().trim() === "Motor Bicycle";
+                    var group = isMotorcycle ? "motorcycle" : "car";
+
+                    $.post("../ajx/ajax_select_contraller.php", {data: 'make_by_group', group: group},
+                        function(data) {
+                            $('#Make').find('option').remove();
+                            $('#Make').append('<option value="">Select Make</option>' + data);
+                            $('#Model').find('option').remove();
+                        }
+                    );
+
+                    $.post("../ajx/ajax_select_contraller.php", {data: 'bodytype_by_group', group: group},
+                        function(data) {
+                            $('#BodyType').find('option').remove();
+                            $('#BodyType').append('<option value="">Please select Body Type</option>' + data);
+                        }
+                    );
+                });
+
                 $(".select_2_select").select2();
 
             });
@@ -164,7 +186,7 @@ $Options = $Options ?? null;
 
                     <div class="heading">
 
-                        <h3>Add Property</h3>                    
+                        <h3>Add Vehicle</h3>
 
                         <div class="resBtnSearch">
                             <a href="#"><span class="icon16 icomoon-icon-search-3"></span></a>
@@ -184,7 +206,7 @@ $Options = $Options ?? null;
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">Property Adding</li>
+                            <li class="active">Add Vehicle</li>
                         </ul>
 
                     </div><!-- End .heading-->
@@ -240,7 +262,7 @@ $Options = $Options ?? null;
                                                         <div class="span5 controls sel" >
                                                             <?=
                                                             CommonBase::createSelect(
-                                                                    ${'Make'}, $name = 'Make', $type = 6, $class = "validate[required]", $title = "", $q = "select Id , name from make WHERE status = 1 ORDER by Id asc", $word = "Select Make", $style = "width:100%;", false
+                                                                    ${'Make'}, $name = 'Make', $type = 6, $class = "validate[required]", $title = "", $q = "select Id , name from make WHERE status = 1 AND vehicle_group = 'car' ORDER by Id asc", $word = "Select Make", $style = "width:100%;", false
                                                             )
                                                             ?>
                                                         </div>   
@@ -274,7 +296,7 @@ $Options = $Options ?? null;
                                                     <div class="row-fluid">
                                                         <label class="form-label span3 red" for="phone">Body Type</label>
                                                         <div class="controls-textarea span5">
-                                                            <?= Vehicle::createSelect($BodyType, "BodyType", 0, "validate[required] nostyle", "Please select Body Type", "select Id , name from body_type WHERE status = 1 ORDER by Id asc") ?>
+                                                            <?= Vehicle::createSelect($BodyType, "BodyType", 0, "validate[required] nostyle", "Please select Body Type", "select Id , name from body_type WHERE status = 1 AND vehicle_group = 'car' ORDER by Id asc") ?>
                                                         </div>
                                                     </div>
                                                 </div>

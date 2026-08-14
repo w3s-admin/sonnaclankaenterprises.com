@@ -111,7 +111,7 @@ ${'other'} = ${'other'} ?? null;
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">Shop Adding</li>
+                            <li class="active">Add User</li>
                         </ul>
 
                     </div><!-- End .heading-->
@@ -216,7 +216,7 @@ ${'other'} = ${'other'} ?? null;
                                                     </div>
                                                 </div>
                                             </div> </div>
-                                        <div class="span6" style="height: 500px; overflow-y: auto">
+                                        <div class="span6 permissions-panel">
                                             <?
                                             $privelage_type = User::get_privilage();
                                             

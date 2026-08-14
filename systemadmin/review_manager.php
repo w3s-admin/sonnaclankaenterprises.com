@@ -95,7 +95,7 @@ CommonBase::IsAdminUser("user_curd");
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">Review Managment</li>
+                            <li class="active">Review Manager</li>
                         </ul>
 
                     </div><!-- End .heading-->
@@ -133,9 +133,6 @@ CommonBase::IsAdminUser("user_curd");
                                             <?
                                             $reviews = Review::getAllReviews();
                                             while ($row = $reviews->fetch(PDO::FETCH_ASSOC)) {
-                                                if ($row['id'] ==1) {
-                                                    continue;
-                                                }
                                                 ?>
                                                 <tr>
                                                     <td><?= $row['Id'] ?></td>

@@ -15,7 +15,10 @@ require_once '../cpad/loginController.php';
         <link href="plugins/forms/uniform/uniform.default.css" type="text/css" rel="stylesheet" />
 
         <!-- Main stylesheets -->
-        <link href="css/main.css" rel="stylesheet" type="text/css" /> 
+        <link href="css/main.css" rel="stylesheet" type="text/css" />
+
+        <!-- Custom stylesheets ( Put your own changes here ) -->
+        <link href="css/custom.css" rel="stylesheet" type="text/css" />
 
         <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
@@ -74,30 +77,29 @@ require_once '../cpad/loginController.php';
 
     <body class="loginPage">
 
-        <div class="container-fluid">
+        <div class="login-screen">
 
-            <div id="header">
+            <div class="login-brandpanel">
+                <div class="login-brandpanel-inner">
+                    <?= CommonBase::createImage($_SESSION['app_pro']['server'] . $_SESSION['app_pro']['main_admin_logo_name'], 108, 108, "login-brand-logo") ?>
+                    <h1><?= $_SESSION['app_pro']['main_company_name'] ?></h1>
+                    <p class="login-brandpanel-tag"><?= $_SESSION['app_pro']['sys_name'] ?></p>
+                    <ul class="login-brandpanel-points">
+                        <li><span class="icon16 icomoon-icon-cars"></span> Manage vehicle &amp; motor bicycle stock</li>
+                        <li><span class="icon16 icomoon-icon-comments"></span> Moderate customer reviews</li>
+                        <li><span class="icon16 icomoon-icon-people"></span> Control staff access</li>
+                    </ul>
+                </div>
+            </div>
 
-                <div class="row-fluid">
+            <div class="login-formpanel">
+              <div class="container-fluid">
 
-                    <div class="navbar">
-                        <div class="navbar-inner">
-                            <div class="container">
-                                <a class="brand" href="<?= $_SESSION['app_pro']['sys_url'] ?>"><?= CommonBase::createImage($_SESSION['app_pro']['server'] . $_SESSION['app_pro']['main_admin_logo_name'], 114, 50) ?>&nbsp;<?= $_SESSION['app_pro']['main_company_name'] ?><span class="slogan" style="padding-left: 4px;"><?= $_SESSION['app_pro']['sys_name'] ?></span></a>
-                            </div>
-                        </div><!-- /navbar-inner -->
-                    </div><!-- /navbar -->
-
-
-                </div><!-- End .row-fluid -->
-
-            </div><!-- End #header -->
-
-        </div><!-- End .container-fluid -->    
-
-        <div class="container-fluid">
-
-            <div class="loginContainer">
+              <div class="loginContainer">
+                <div class="login-formhead">
+                    <h3>Welcome back</h3>
+                    <p>Sign in to the admin panel</p>
+                </div>
                 <?
                 if (isset($adminlogin_msg)) {
                     echo $adminlogin_msg;
@@ -142,10 +144,13 @@ require_once '../cpad/loginController.php';
                     </div>
 
                 </form>
+              </div>
+
+              </div>
             </div>
 
         </div>
-        <!-- End .container-fluid --->
+        <!-- End .login-screen --->
 
         <? include_once './inc/comman_js.php'; ?>
         <script type="text/javascript">

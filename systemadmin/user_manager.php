@@ -75,7 +75,7 @@ CommonBase::IsAdminUser("user_curd");
 
                     <div class="heading">
 
-                        <h3>Shop Managment</h3>                    
+                        <h3>User Manager</h3>
 
                         <div class="resBtnSearch">
                             <a href="#"><span class="icon16 icomoon-icon-search-3"></span></a>
@@ -95,7 +95,7 @@ CommonBase::IsAdminUser("user_curd");
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">User Managment</li>
+                            <li class="active">User Manager</li>
                         </ul>
 
                     </div><!-- End .heading-->

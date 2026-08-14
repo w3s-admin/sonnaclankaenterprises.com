@@ -16,6 +16,7 @@ $vdetails = Vehicle::getVehicle($id);
 
 $Stock = $vdetails['fk_stock'];
 $vtype = $vdetails['fk_type'];
+$vehicleGroup = ($vtype == 17) ? 'motorcycle' : 'car'; // 17 = Motor Bicycle in the `type` table
 $Make = $vdetails['fk_make'];
 $Model = $vdetails['fk_model'];
 $Modeltxt = $vdetails['modeltxt'];
@@ -156,7 +157,7 @@ $so_price = ($vdetails['special_offer_price'] == 0) ? "" : $vdetails['special_of
 
                                                 <?=
                                                 CommonBase::createSelect(
-                                                        ${'Make'}, $name = 'Make', $type = 6, $class = "nostyle  validate[required]", $title = "", $q = "select Id , name from make WHERE status = 1 ORDER by Id asc", $word = "Select Make", $style = "width:100%;", false
+                                                        ${'Make'}, $name = 'Make', $type = 6, $class = "nostyle  validate[required]", $title = "", $q = "select Id , name from make WHERE status = 1 AND vehicle_group = '$vehicleGroup' ORDER by Id asc", $word = "Select Make", $style = "width:100%;", false
                                                 )
                                                 ?>
                                             </div>   
@@ -190,7 +191,7 @@ $so_price = ($vdetails['special_offer_price'] == 0) ? "" : $vdetails['special_of
                                         <div class="row-fluid">
                                             <label class="form-label span3 red" for="phone">Body Type</label>
                                             <div class="controls-textarea span5">
-                                                <?= Vehicle::createSelect($BodyType, "BodyType", 0, "validate[required] nostyle", "Please select Body Type", "select Id , name from body_type WHERE status = 1 ORDER by Id asc") ?>
+                                                <?= Vehicle::createSelect($BodyType, "BodyType", 0, "validate[required] nostyle", "Please select Body Type", "select Id , name from body_type WHERE status = 1 AND vehicle_group = '$vehicleGroup' ORDER by Id asc") ?>
                                             </div>
                                         </div>
                                     </div>
@@ -334,6 +335,38 @@ $so_price = ($vdetails['special_offer_price'] == 0) ? "" : $vdetails['special_of
                                             } else {
                                                 $('#priceDIV').show();
                                             }
+                                        });
+
+                                        // Bug fix: this page previously had no Make->Model handler at all,
+                                        // so changing Make while editing a vehicle never refreshed Model.
+                                        $("#Make").change(function() {
+                                            $.post("../ajx/ajax_select_contraller.php", {id: $(this).val(), data: 'main'},
+                                                function(data) {
+                                                    $('#Model').find('option').remove();
+                                                    $("#Model").append(data);
+                                                }
+                                            );
+                                        });
+
+                                        // Motor Bicycle support: switching Type re-filters Make and Body Type.
+                                        $("#vtype").change(function() {
+                                            var isMotorcycle = $(this).find(":selected").text().trim() === "Motor Bicycle";
+                                            var group = isMotorcycle ? "motorcycle" : "car";
+
+                                            $.post("../ajx/ajax_select_contraller.php", {data: 'make_by_group', group: group},
+                                                function(data) {
+                                                    $('#Make').find('option').remove();
+                                                    $('#Make').append('<option value="">Select Make</option>' + data);
+                                                    $('#Model').find('option').remove();
+                                                }
+                                            );
+
+                                            $.post("../ajx/ajax_select_contraller.php", {data: 'bodytype_by_group', group: group},
+                                                function(data) {
+                                                    $('#BodyType').find('option').remove();
+                                                    $('#BodyType').append('<option value="">Please select Body Type</option>' + data);
+                                                }
+                                            );
                                         });
 
 

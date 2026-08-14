@@ -206,7 +206,7 @@ ${'other'} = ${'other'} ?? null;
                     <div class="content"  >
 
                         <form class="form-horizontal" id="form-validate_addshop" action=""  enctype="multipart/form-data"  method="post">
-                            <div style="overflow-y: auto ;height:435px ; overflow-x: hidden;">
+                            <div class="permissions-panel">
                                 <?
                                 $privelage_type = User::get_privilage();
 

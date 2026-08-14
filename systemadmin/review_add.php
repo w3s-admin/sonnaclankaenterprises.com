@@ -105,7 +105,7 @@ $comment = $comment ?? null;
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">Review Adding</li>
+                            <li class="active">Add Review</li>
                         </ul>
 
                     </div><!-- End .heading-->
