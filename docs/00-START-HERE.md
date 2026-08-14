@@ -33,6 +33,7 @@ Read these in order, or jump to whichever part you need:
 5. **[Managing Staff Accounts](05-staff-accounts.md)** — who else can log into the admin panel, and what they're allowed to do
 6. **[Newsletter & Email Tools](06-newsletter-emails.md)** — a feature that exists in the system but currently isn't turned on (explained inside)
 7. **[Quick Reference: "How Do I...?"](07-quick-reference.md)** — a cheat-sheet for common tasks
+8. **[Testing Guide](08-testing-guide.md)** — a step-by-step checklist to test every admin feature yourself, with sample test data
 
 ## The One-Sentence Version
 

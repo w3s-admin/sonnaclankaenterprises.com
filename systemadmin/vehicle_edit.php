@@ -170,18 +170,12 @@ $so_price = ($vdetails['special_offer_price'] == 0) ? "" : $vdetails['special_of
                                         <div class="row-fluid">
                                             <label class="form-label span3 red" for="validate[required]">Model</label>
                                             <div class="grid-inputs span6 controls">
-                                                <div class="span6"><div class="span11 controls">
-                                                        <select id="Model"  name="Model" class="validate[required] nostyle" title="Please Select Model ">
-                                                            <?= CommonBase::createSelectAjxSearch(CommonBase::encrypt(${'Model'}), CommonBase::encrypt(${'Make'}), "select Id,name from model WHERE fk_make = ? and status =1", "fk_model", "Price Per") ?>
-
-                                                        </select> </div>
-
+                                                <div class="span11 controls">
+                                                    <select id="Model"  name="Model" class="validate[required] nostyle" title="Please Select Model ">
+                                                        <?= CommonBase::createSelectAjxSearch(CommonBase::encrypt(${'Model'}), CommonBase::encrypt(${'Make'}), "select Id,name from model WHERE fk_make = ? and status =1", "fk_model", "Select Model") ?>
+                                                    </select>
+                                                    <input type="hidden" name="Modeltxt" value="<?= $Modeltxt ?>" />
                                                 </div>
-                                                <div class="span4">
-                                                    <input type="text" name="Modeltxt" id="Modeltxt" class="validate[required]" title="Please Add Model" value="<?= $Modeltxt ?>" />
-                                                </div>
-
-
                                             </div>
                                         </div>
                                     </div>

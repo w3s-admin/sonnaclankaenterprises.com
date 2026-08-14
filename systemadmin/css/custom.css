@@ -7,7 +7,7 @@
    color-only pass over the original markup.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
     --admin-primary: #123A5C;
@@ -42,6 +42,7 @@
 
     --admin-font: 'Fira Sans', -apple-system, Helvetica, Arial, sans-serif;
     --admin-font-mono: 'Fira Code', 'Consolas', monospace;
+    --admin-font-display: 'Space Grotesk', 'Fira Sans', -apple-system, Helvetica, Arial, sans-serif;
 
     --admin-radius-sm: 8px;
     --admin-radius-md: 12px;
@@ -804,53 +805,242 @@ div.ibutton-label-on, div.ibutton-label-off {
 }
 
 /* ==========================================================================
-   Login screen — split brand / form panels
+   Login screen — "night showroom" split screen.
+   Left: a dark hero panel built as a receding road running toward a
+   headlight-glow vanishing point, with faint light-trails drifting up it —
+   the one bespoke, animated signature element on this page. Right: a plain
+   light sign-in card. Everything else on the page is deliberately quiet so
+   that graphic reads as the single memorable thing, not one of several
+   competing effects. Stacks to a single column under 880px.
+
+   main.css still ships a much older .loginContainer rule built for a tiny
+   fixed 300x232 box (position:absolute + top/left:50% + negative pixel
+   margins, plus rotated ::before/::after "stacked paper" decorations).
+   It's a lower layer we don't otherwise touch, so it's explicitly
+   neutralized below rather than assumed away.
    ========================================================================== */
-body.loginPage { background: var(--sidebar-bg) !important; }
-body.loginPage .container-fluid:first-of-type { display: none; }
+body.loginPage {
+    background: #06090F !important;
+}
 
-.login-screen { display: flex; min-height: 100vh; }
-
-.login-brandpanel {
-    flex: 0 0 42%;
-    max-width: 560px;
-    background: var(--sidebar-bg);
-    background-image: radial-gradient(circle at 15% 20%, rgba(239,193,46,0.14), transparent 45%),
-                       radial-gradient(circle at 85% 85%, rgba(5,150,105,0.16), transparent 50%);
+.login-screen {
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 48px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--admin-space-6);
 }
-.login-brandpanel-inner { max-width: 360px; }
-.login-brandpanel-inner img { border-radius: var(--admin-radius-md); margin-bottom: var(--admin-space-5); }
-.login-brandpanel-inner h1 { color: #fff !important; font-size: 27px; margin: 0 0 6px; }
-.login-brandpanel-tag { color: var(--admin-gold); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin: 0 0 var(--admin-space-6); }
-.login-brandpanel-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-.login-brandpanel-points li { display: flex; align-items: center; gap: 10px; color: var(--sidebar-text); font-size: 13.5px; }
-.login-brandpanel-points .icon16 { color: var(--admin-gold); opacity: 1; }
 
-.login-formpanel { flex: 1 1 auto; background: var(--admin-bg); display: flex; align-items: center; justify-content: center; }
-.login-formpanel .container-fluid { width: 100%; }
-
-.loginContainer {
+.login-shell {
+    display: flex;
+    width: 100%;
+    max-width: 980px;
+    min-height: 580px;
     background: var(--admin-surface);
-    border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius-lg);
     box-shadow: var(--admin-shadow-lg);
-    max-width: 380px;
-    margin: 0 auto;
-    padding: var(--admin-space-6) var(--admin-space-5);
+    overflow: hidden;
 }
+
+/* ---- Left: hero panel. Purely static color treatment: a navy-to-ink
+   diagonal gradient with one soft gold glow behind the headline. No
+   graphics, no motion — the brand navy/gold pairing carries the panel
+   on its own. ---- */
+.login-hero {
+    position: relative;
+    flex: 1 1 54%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--admin-space-6);
+    padding: var(--admin-space-6) var(--admin-space-6) 44px;
+    color: #fff;
+    background: linear-gradient(165deg, var(--sidebar-bg-raised) 0%, var(--sidebar-bg) 55%, #05080F 100%);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.login-hero-glow {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    width: 460px;
+    height: 460px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(239, 193, 46, 0.30), rgba(239, 193, 46, 0) 70%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.login-hero-top, .login-hero-copy, .login-hero-status { position: relative; z-index: 1; }
+.login-hero-rule { width: 40px; height: 3px; border-radius: 2px; background: var(--admin-gold); margin: 0 0 var(--admin-space-5); }
+
+/* The configured logo can be any aspect ratio (the current brand mark is a
+   wide 223x98 badge, not a square) — scale it by height only and let width
+   follow naturally, so it's never stretched or circle-cropped. */
+.login-hero-brand { display: flex; align-items: center; gap: var(--admin-space-4); }
+.login-hero-brand img {
+    flex-shrink: 0;
+    height: 52px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+}
+.login-hero-company { font-weight: 800; font-size: 16.5px; color: #fff; }
+.login-hero-sys { font-size: 11px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
+
+.login-hero-copy h1 {
+    font-family: var(--admin-font-display) !important;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin: 0 0 10px;
+}
+.login-hero-copy h1 em { color: var(--admin-gold); font-style: normal; }
+.login-hero-copy p { color: rgba(255,255,255,0.62); font-size: 13.5px; max-width: 34ch; margin: 0 0 var(--admin-space-5); }
+
+.login-hero-features { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.login-hero-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.78);
+}
+.login-hero-features .icon16 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    color: var(--admin-gold);
+    flex-shrink: 0;
+}
+
+.login-hero-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.login-hero-status .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--admin-success);
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.25);
+}
+
+/* ---- Right: sign-in card ---- */
+.login-panel {
+    flex: 1 1 46%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 52px var(--admin-space-6);
+    background: var(--admin-surface);
+}
+.loginContainer {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    max-width: 340px;
+    padding: 0;
+    box-sizing: border-box;
+}
+.loginContainer::before, .loginContainer::after { content: none !important; display: none !important; }
+.loginContainer .form-actions { margin: 0 !important; padding: 0 !important; }
+
 .login-formhead { margin-bottom: var(--admin-space-5); }
 .login-formhead h3 { font-size: 22px; margin: 0 0 4px; }
 .login-formhead p { color: var(--admin-text-secondary); font-size: 13px; margin: 0; }
-.loginContainer .form-label { font-size: 13px; }
-#loginBtn { width: 100%; justify-content: center; padding: 11px 0 !important; }
 
-@media (max-width: 900px) {
-    .login-brandpanel { display: none; }
-    .login-formpanel { width: 100%; }
+.login-field { margin-top: var(--admin-space-4); }
+.login-field:first-child { margin-top: 0; }
+.login-field-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--admin-space-2);
+    margin-bottom: 6px;
+}
+.login-field label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--admin-text);
+}
+.login-field > label { display: block; margin-bottom: 6px; }
+.login-forgot { font-size: 12px; font-weight: 600; }
+
+.login-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.login-input .icon16 {
+    position: absolute;
+    left: 13px;
+    color: var(--admin-text-muted);
+    pointer-events: none;
+}
+.login-input input {
+    width: 100%;
+    padding-left: 40px !important;
+}
+.login-input:focus-within .icon16 { color: var(--admin-primary); }
+.login-input #password { padding-right: 40px !important; }
+.login-eye-toggle {
+    position: absolute;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border: none;
+    background: transparent;
+    color: var(--admin-text-muted);
+    border-radius: var(--admin-radius-sm);
+    cursor: pointer;
+}
+.login-eye-toggle:hover { color: var(--admin-text); background: var(--admin-bg); }
+
+.login-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--admin-text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+#loginBtn { width: 100%; justify-content: center; padding: 11px 0 !important; margin-top: var(--admin-space-5); }
+
+.login-footnote { margin: var(--admin-space-5) 0 0; font-size: 11.5px; color: var(--admin-text-muted); max-width: 340px; }
+
+/* ---- Responsive: stack under 880px ---- */
+@media (max-width: 880px) {
+    .login-screen { padding: 0; align-items: flex-start; }
+    .login-shell { flex-direction: column; max-width: 460px; min-height: 0; border-radius: 0; margin: 0 auto; box-shadow: none; min-height: 100vh; }
+    .login-hero { padding: var(--admin-space-5) var(--admin-space-5) 36px; gap: var(--admin-space-5); }
+    .login-hero-copy h1 { font-size: 26px; }
+    .login-hero-features { display: none; }
+    .login-hero-road { height: 46%; }
+    .login-panel { padding: var(--admin-space-6) var(--admin-space-5); }
+    .loginContainer { max-width: none; }
 }
 
 /* ==========================================================================
@@ -866,3 +1056,45 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     outline: 2px solid var(--admin-gold);
     outline-offset: 2px;
 }
+
+/* ==========================================================================
+   "Required field" validation bubble (Validation Engine plugin)
+   Restyled from the plugin's default bright-red / bold / hard-shadow bubble
+   to match the rest of the design system. The arrow is a stack of tiny divs
+   forming a pixel triangle — recolored in place rather than replaced, so its
+   existing top/bottom positioning logic (which flips depending on where the
+   field sits on screen) keeps working correctly.
+   ========================================================================== */
+.formError {
+    z-index: 3000 !important;
+    font-family: var(--admin-font) !important;
+}
+.formError .formErrorContent {
+    background: var(--admin-danger) !important;
+    color: #fff !important;
+    font-family: var(--admin-font) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.4;
+    text-shadow: none !important;
+    border: none !important;
+    border-radius: var(--admin-radius-sm) !important;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3) !important;
+    padding: 8px 14px !important;
+}
+.formError .formErrorArrow div {
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+    box-shadow: none !important;
+    background: var(--admin-danger) !important;
+}
+.formError .formErrorArrow .line3 {
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+}
+.formError .formErrorArrow .line2,
+.formError .formErrorArrow .line1 {
+    background: var(--admin-danger) !important;
+}
+.greenPopup .formErrorContent { background: var(--admin-success) !important; box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3) !important; }
+.greenPopup .formErrorArrow div { background: var(--admin-success) !important; }

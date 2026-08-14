@@ -49,7 +49,16 @@
       "Bash(python cdp_fresh768.py)",
       "Bash(python cdp_li.py)",
       "Bash(python cdp_check2.py)",
-      "Bash(python cdp_multi.py dashboard.php vehicle_manager.php)"
+      "Bash(python cdp_multi.py dashboard.php vehicle_manager.php)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --remote-debugging-port=9333 --remote-allow-origins=* --user-data-dir=/tmp/chrome-profile5 --window-size=1920,1080 --no-first-run about:blank)",
+      "Bash(python cdp_multi.py vehicle_add.php)",
+      "Bash(taskkill //F //IM chrome.exe)",
+      "Bash(python cdp_loginmeasure.py)",
+      "Bash(powershell -Command \"[Convert]::ToBase64String\\([IO.File]::ReadAllBytes\\('C:\\\\Projects Github\\\\sonnaclankaenterprises.com\\\\systemadmin\\\\images\\\\main-logo.png'\\)\\) | Out-File -Encoding ascii 'C:\\\\Users\\\\info\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects-Github-sonnaclankaenterprises-com\\\\0aa1f322-2f21-45b4-a97b-6f2d8a01281a\\\\scratchpad\\\\logo_b64.txt'\")",
+      "Bash(powershell -Command \"\\(Get-Item 'C:\\\\Projects Github\\\\sonnaclankaenterprises.com\\\\systemadmin\\\\images\\\\main-logo.png'\\).Length; \\(Get-Item 'C:\\\\Users\\\\info\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects-Github-sonnaclankaenterprises-com\\\\0aa1f322-2f21-45b4-a97b-6f2d8a01281a\\\\scratchpad\\\\logo_b64.txt'\\).Length\")"
     ]
+  },
+  "enabledPlugins": {
+    "superdesign@claude-plugins-official": true
   }
 }

@@ -20,6 +20,7 @@ $__navGroups = array(
         'title' => 'Vehicle Attributes',
         'icon'  => 'icomoon-icon-cogs',
         'items' => array(
+            array('stock_manager.php', 'icomoon-icon-box-add', 'Stock'),
             array('make_manager.php', 'icomoon-icon-cars', 'Make'),
             array('model_manager.php', 'icomoon-icon-list-view', 'Model'),
             array('colour_manager.php', 'icomoon-icon-color-palette', 'Colour'),
