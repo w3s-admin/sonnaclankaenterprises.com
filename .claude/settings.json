@@ -55,7 +55,10 @@
       "Bash(taskkill //F //IM chrome.exe)",
       "Bash(python cdp_loginmeasure.py)",
       "Bash(powershell -Command \"[Convert]::ToBase64String\\([IO.File]::ReadAllBytes\\('C:\\\\Projects Github\\\\sonnaclankaenterprises.com\\\\systemadmin\\\\images\\\\main-logo.png'\\)\\) | Out-File -Encoding ascii 'C:\\\\Users\\\\info\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects-Github-sonnaclankaenterprises-com\\\\0aa1f322-2f21-45b4-a97b-6f2d8a01281a\\\\scratchpad\\\\logo_b64.txt'\")",
-      "Bash(powershell -Command \"\\(Get-Item 'C:\\\\Projects Github\\\\sonnaclankaenterprises.com\\\\systemadmin\\\\images\\\\main-logo.png'\\).Length; \\(Get-Item 'C:\\\\Users\\\\info\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects-Github-sonnaclankaenterprises-com\\\\0aa1f322-2f21-45b4-a97b-6f2d8a01281a\\\\scratchpad\\\\logo_b64.txt'\\).Length\")"
+      "Bash(powershell -Command \"\\(Get-Item 'C:\\\\Projects Github\\\\sonnaclankaenterprises.com\\\\systemadmin\\\\images\\\\main-logo.png'\\).Length; \\(Get-Item 'C:\\\\Users\\\\info\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Projects-Github-sonnaclankaenterprises-com\\\\0aa1f322-2f21-45b4-a97b-6f2d8a01281a\\\\scratchpad\\\\logo_b64.txt'\\).Length\")",
+      "Bash(php -l systemadmin/dashboard.php)",
+      "Bash(php -l systemadmin/index.php)",
+      "Bash(awk 'BEGIN{o=0;c=0} {o+=gsub\\(/\\\\{/,\"{\"\\); c+=gsub\\(/\\\\}/,\"}\"\\)} END{print \"open\",o,\"close\",c}' systemadmin/css/custom.css)"
     ]
   },
   "enabledPlugins": {

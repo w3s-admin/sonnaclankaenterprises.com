@@ -37,3 +37,4 @@
 19:12:46 (admin_logout) LOG OUT Admin ( LOGIN:Friday 14th of August 2026 07:05:24 PM  LOGOUT:2026-08-14 19:12:46  ip : ::1 ,  Browser : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36, Admin ID : 2 Admin Name : test )
 15:43:01 (index) ip : ::1 ,  Browser : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36, User Name : test , User ID : 2
 19:13:44 (admin_logout) LOG OUT Admin ( LOGIN:Friday 14th of August 2026 07:12:03 PM  LOGOUT:2026-08-14 19:13:44  ip : ::1 ,  Browser : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36, Admin ID : 2 Admin Name : test )
+17:12:10 (index) ip : ::1 ,  Browser : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36, User Name : test , User ID : 2

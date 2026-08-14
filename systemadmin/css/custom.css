@@ -150,6 +150,9 @@ small, .text-muted { color: var(--admin-text-muted); font-size: 12px; }
 .admin-topbar-company { font-weight: 800; font-size: 14.5px; color: var(--admin-text); white-space: nowrap; }
 .admin-topbar-slogan { font-size: 10.5px; color: var(--admin-text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
 
+/* Account cluster — the avatar/name dropdown and Logout live inside one
+   continuous pill (not two separate floating buttons), split by a hairline
+   divider, so they read as a single "your account" control. */
 #header .navbar .nav.admin-user-menu {
     position: absolute !important;
     left: auto !important;
@@ -161,59 +164,83 @@ small, .text-muted { color: var(--admin-text-muted); font-size: 12px; }
     width: auto !important;
     min-width: 220px !important;
     max-width: none !important;
+    height: 42px;
     display: flex !important;
-    align-items: center !important;
+    align-items: stretch !important;
     justify-content: flex-end !important;
-    gap: var(--admin-space-2) !important;
+    gap: 0 !important;
     float: none !important;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: 999px;
+    box-shadow: var(--admin-shadow);
+    overflow: hidden;
 }
-.admin-user-menu > li { flex-shrink: 0 !important; }
+.admin-user-menu > li { flex-shrink: 0 !important; float: none !important; height: 100%; display: flex; align-items: stretch; }
 .admin-user-toggle, .admin-logout-link { flex-shrink: 0 !important; white-space: nowrap; }
 .admin-topbar-right { float: none !important; position: static !important; }
-.admin-user-menu > li { float: none !important; }
 .admin-user-toggle {
-    display: block !important;
+    display: flex !important;
+    align-items: center;
     white-space: nowrap !important;
     width: max-content !important;
-    height: 40px !important;
-    line-height: 40px !important;
+    height: 100% !important;
     box-sizing: border-box !important;
-    padding: 0 14px 0 6px !important;
-    border-radius: 999px;
-    background: var(--admin-bg);
+    padding: 0 16px 0 8px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     text-decoration: none !important;
+    transition: background-color 150ms ease;
 }
 .admin-user-toggle .admin-avatar,
-.admin-user-toggle .admin-user-name,
-.admin-user-toggle .caret {
+.admin-user-toggle .admin-user-name {
     display: inline-block;
     vertical-align: middle;
 }
+.admin-user-toggle .caret {
+    vertical-align: middle;
+    opacity: 0.55;
+    transition: transform 150ms ease;
+}
 .admin-user-toggle .admin-avatar { margin-right: 10px; }
-.admin-user-toggle .admin-user-name { margin-right: 8px; }
-.admin-user-toggle:hover { background: #E9ECF2; }
+.admin-user-toggle .admin-user-name { margin-right: 6px; }
+.admin-user-toggle:hover { background: var(--admin-bg) !important; }
+.dropdown.open .admin-user-toggle .caret { transform: rotate(180deg); }
 .admin-avatar {
-    width: 32px; height: 32px;
+    width: 30px; height: 30px;
     border-radius: 50%;
-    background: var(--admin-primary);
+    background: linear-gradient(160deg, var(--admin-primary-light), var(--admin-primary));
     color: #fff;
     text-align: center;
-    line-height: 32px;
-    font-size: 12.5px; font-weight: 700;
+    line-height: 30px;
+    font-size: 12px; font-weight: 700;
+    box-shadow: 0 0 0 2px var(--admin-surface), 0 0 0 3.5px rgba(18,58,92,0.16);
 }
 .admin-user-name { color: var(--admin-text) !important; font-weight: 600; font-size: 13px; white-space: nowrap; }
 .admin-user-dropdown { border-radius: var(--admin-radius-md) !important; box-shadow: var(--admin-shadow-lg) !important; border: 1px solid var(--admin-border) !important; overflow: hidden; }
 .admin-user-lastlogin { padding: var(--admin-space-3) var(--admin-space-4) !important; color: var(--admin-text-secondary); font-size: 12.5px; }
 .admin-logout-link {
-    display: flex !important; align-items: center; gap: 6px;
+    display: flex !important; align-items: center; gap: 7px;
     color: var(--admin-danger) !important;
     font-weight: 600; font-size: 13px;
-    height: 40px !important;
+    height: 100% !important;
     box-sizing: border-box !important;
-    padding: 0 16px !important;
-    border-radius: 999px;
+    padding: 0 18px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative;
 }
-.admin-logout-link:hover { background: var(--admin-danger-bg); }
+.admin-logout-link::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 9px; bottom: 9px;
+    width: 1px;
+    background: var(--admin-border);
+}
+.admin-logout-link .icon16 { opacity: 0.9; }
+.admin-logout-link:hover { background: var(--admin-danger-bg) !important; color: var(--admin-danger) !important; }
 
 /* ==========================================================================
    SIDEBAR
@@ -682,14 +709,9 @@ th.sorting_desc::after {
     box-shadow: 0 2px 4px rgba(5,150,105,0.26), 0 8px 20px rgba(5,150,105,0.3) !important;
 }
 
-/* Logout link + any .btn-style link outside the .btn family */
-.admin-logout-link {
-    border: 1px solid var(--admin-border);
-    box-shadow: 0 1px 2px rgba(15,23,42,0.06);
-    transition: background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
-}
-.admin-logout-link:hover { box-shadow: 0 4px 10px rgba(220,38,38,0.14); transform: translateY(-1px); }
-.admin-logout-link:active { transform: translateY(0) scale(0.97); }
+/* Logout now lives inside the unified account pill — see admin-user-menu
+   above — so it takes no border/shadow/lift of its own here. */
+.admin-logout-link { transition: background-color 150ms ease; }
 
 /* File inputs — match the rest of the form controls */
 input[type="file"] {
@@ -1097,4 +1119,108 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     background: var(--admin-danger) !important;
 }
 .greenPopup .formErrorContent { background: var(--admin-success) !important; box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3) !important; }
+
+/* ==========================================================================
+   Design System v2.1 — cross-app chrome polish.
+   Everything below touches shared includes (page loader, topbar, sidebar,
+   page header, tables, scrollbars) so it upgrades all 24 admin pages at
+   once, on top of the v2 system above. Dashboard-specific chart/thumbnail
+   components are at the end.
+   ========================================================================== */
+
+/* ---- Page loader — every page shows this for ~500ms on load. Replace the
+   2012 tiled-pattern overlay + spinner GIF with a brand navy scrim and a
+   CSS ring in the gold/primary pair. ---- */
+#qLoverlay {
+    background: var(--sidebar-bg) !important;
+    opacity: 0.97 !important;
+}
+#qLbar {
+    background: none !important;
+    width: 44px !important;
+    height: 44px !important;
+    margin-top: -22px !important;
+    margin-left: -22px !important;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.15);
+    border-top-color: var(--admin-gold);
+    animation: adminLoaderSpin 700ms linear infinite;
+}
+@keyframes adminLoaderSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    #qLbar { animation: none; border-top-color: rgba(255,255,255,0.15); }
+}
+
+/* ---- Global scrollbars — the light content area gets a slim neutral
+   scrollbar instead of the OS default; the dark sidebar gets one that
+   doesn't flash white against navy. ---- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; border: 2px solid var(--admin-bg); }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+#sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border: none; }
+#sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.24); }
+
+/* ---- Topbar — a hairline gold accent along the very top edge ties every
+   page back to the login screen's brand treatment, plus a tidier dropdown. ---- */
+#header.admin-topbar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--admin-gold), var(--admin-primary-light) 65%, transparent);
+}
+.admin-user-dropdown { padding: 4px !important; margin-top: 10px !important; }
+.admin-user-dropdown .admin-user-lastlogin { border-radius: var(--admin-radius-sm); }
+
+/* ---- Sidebar — subtle hover motion + section rhythm ---- */
+.admin-nav-link { transform: translateX(0); }
+.admin-nav-link:hover { transform: translateX(2px); }
+.admin-nav-section + .admin-nav-section { border-top: 1px solid var(--sidebar-border); margin-top: var(--admin-space-2); padding-top: var(--admin-space-2); }
+
+/* ---- Page header — icon + divider so every page opens with the same
+   considered rhythm as a card, not a bare heading. ---- */
+.heading { border-bottom: 1px solid var(--admin-border) !important; padding-bottom: var(--admin-space-4) !important; margin-bottom: var(--admin-space-5) !important; }
+.breadcrumb li + li::before { content: '/'; margin: 0 6px; color: var(--admin-text-muted); }
+.breadcrumb > li { display: inline-flex; align-items: center; }
+
+/* ---- Table empty state — icon + message, centered, instead of a bare
+   line of muted text (used by dashboard and any manager with no rows). ---- */
+.table-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: var(--admin-space-6) var(--admin-space-4);
+    color: var(--admin-text-muted);
+    text-align: center;
+}
+.table-empty-state .icon24 { font-size: 26px; opacity: 0.5; }
+.table-empty-state strong { color: var(--admin-text-secondary); font-size: 13.5px; font-weight: 600; }
+
+/* ==========================================================================
+   Dashboard — chart cards and recent-vehicle thumbnails.
+   ========================================================================== */
+.chart-card { display: flex; flex-direction: column; }
+.chart-card .chart-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--admin-space-2); margin-bottom: var(--admin-space-4); }
+.chart-card .chart-card-head h4 { margin: 0; }
+.chart-card .chart-card-meta { font-size: 12px; color: var(--admin-text-muted); }
+.chart-card .chart-canvas { width: 100%; flex: 1 1 auto; min-height: 200px; }
+.chart-card .chart-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+.recent-vehicle-thumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.recent-vehicle-thumb img {
+    width: 52px; height: 38px;
+    object-fit: cover;
+    border-radius: var(--admin-radius-sm);
+    border: 1px solid var(--admin-border);
+    flex-shrink: 0;
+}
+.recent-vehicle-thumb .rv-title { font-weight: 600; color: var(--admin-text); font-size: 13.5px; }
+.recent-vehicle-thumb .rv-sub { font-size: 11.5px; color: var(--admin-text-muted); }
 .greenPopup .formErrorArrow div { background: var(--admin-success) !important; }

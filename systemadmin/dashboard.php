@@ -14,6 +14,25 @@ $staffCount = (int) $dbh->query("SELECT COUNT(*) FROM system_admin WHERE _status
 
 $recentStmt = $dbh->query("SELECT Id, modeltxt, fk_make, fk_model, price, status, flow, addt FROM advert WHERE status = 1 ORDER BY Id DESC LIMIT 6");
 $recentVehicles = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Vehicles added per month, last 6 months (chronological, zero-filled so a quiet month still shows).
+$monthlyStmt = $dbh->query("SELECT DATE_FORMAT(addt, '%Y-%m') AS ym, COUNT(*) AS cnt FROM advert WHERE status = 1 AND addt >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY ym");
+$monthlyRows = $monthlyStmt ? $monthlyStmt->fetchAll(PDO::FETCH_ASSOC) : array();
+$monthlyByYm = array();
+foreach ($monthlyRows as $r) {
+    $monthlyByYm[$r['ym']] = (int) $r['cnt'];
+}
+$monthLabels = array();
+$monthValues = array();
+for ($i = 5; $i >= 0; $i--) {
+    $ym = date('Y-m', strtotime("-$i months"));
+    $monthLabels[] = date('M', strtotime("-$i months"));
+    $monthValues[] = isset($monthlyByYm[$ym]) ? $monthlyByYm[$ym] : 0;
+}
+$monthTicks = array();
+foreach ($monthLabels as $i => $lbl) {
+    $monthTicks[] = array($i, $lbl);
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -89,27 +108,63 @@ $recentVehicles = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="row-fluid">
                             <div class="span8">
+                                <div class="admin-card chart-card">
+                                    <div class="chart-card-head">
+                                        <h4>Vehicles Added</h4>
+                                        <span class="chart-card-meta">Last 6 months</span>
+                                    </div>
+                                    <div id="monthlyTrendChart" class="chart-canvas" style="height:220px;"></div>
+                                </div>
+                            </div>
+                            <div class="span4">
+                                <div class="admin-card chart-card">
+                                    <div class="chart-card-head">
+                                        <h4>Inventory Split</h4>
+                                    </div>
+                                    <div id="stockSplitChart" class="chart-canvas" style="height:180px; min-height:180px;"></div>
+                                    <div style="display:flex; justify-content:center; gap:16px; margin-top:10px; font-size:12.5px; color:var(--admin-text-secondary);">
+                                        <span><span class="chart-legend-dot" style="background:var(--admin-primary)"></span>In Stock</span>
+                                        <span><span class="chart-legend-dot" style="background:var(--admin-success)"></span>Sold</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="span8">
                                 <div class="admin-card">
                                     <h4 style="margin-top:0;">Recently Added Vehicles</h4>
                                     <?php if (empty($recentVehicles)): ?>
-                                        <p style="color: var(--admin-text-secondary);">No vehicles in stock yet.</p>
+                                        <div class="table-empty-state">
+                                            <span class="icon24 icomoon-icon-cars"></span>
+                                            <strong>No vehicles in stock yet</strong>
+                                            <span>New listings will show up here as soon as they're added.</span>
+                                        </div>
                                     <?php else: ?>
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
                                                 <th>Ref</th>
-                                                <th>Make</th>
-                                                <th>Model</th>
+                                                <th>Vehicle</th>
                                                 <th>Price</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($recentVehicles as $v): ?>
+                                            <?php foreach ($recentVehicles as $v):
+                                                $vImg = Vehicle::getFirastimage($v['Id']);
+                                            ?>
                                             <tr>
                                                 <td>#<?= $v['Id'] ?></td>
-                                                <td><?= htmlspecialchars(CommonBase::getname($v['fk_make'], "make")) ?></td>
-                                                <td><?= htmlspecialchars(CommonBase::getname($v['fk_model'], "model")) ?></td>
+                                                <td>
+                                                    <div class="recent-vehicle-thumb">
+                                                        <?= CommonBase::createImage(CommonBase::getServer() . $vImg['tpath'] . $vImg['image_name'], 52, 38) ?>
+                                                        <div>
+                                                            <div class="rv-title"><?= htmlspecialchars(CommonBase::getname($v['fk_make'], "make")) ?> <?= htmlspecialchars(CommonBase::getname($v['fk_model'], "model")) ?></div>
+                                                            <div class="rv-sub"><?= htmlspecialchars($v['modeltxt']) ?></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
                                                 <td><?= CommonBase::formatMoney($v['price'], 0) ?></td>
                                                 <td>
                                                     <?php if ($v['flow'] == 2): ?>
@@ -147,6 +202,50 @@ $recentVehicles = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
         </div><!-- End #wrapper -->
 
         <? include_once './inc/comman_js.php'; ?>
+        <script type="text/javascript">
+            $(function () {
+                if (!$.plot) { return; }
+
+                var monthTicks = <?= json_encode($monthTicks) ?>;
+                var monthValues = <?= json_encode($monthValues) ?>;
+                var barData = [];
+                for (var i = 0; i < monthValues.length; i++) { barData.push([i, monthValues[i]]); }
+
+                $.plot("#monthlyTrendChart", [{
+                    data: barData,
+                    bars: { show: true, barWidth: 0.55, align: "center", fillColor: "#123A5C", lineWidth: 0 },
+                    color: "#123A5C"
+                }], {
+                    grid: { borderWidth: 0, hoverable: true, clickable: false, margin: { top: 12, right: 12, bottom: 4, left: 4 } },
+                    xaxis: { ticks: monthTicks, tickLength: 0 },
+                    yaxis: { min: 0, tickDecimals: 0 },
+                    tooltip: true,
+                    tooltipOpts: { content: "%y vehicle(s)", shifts: { x: -30, y: -40 } }
+                });
+
+                <?php if (($inStockCount + $soldCount) > 0): ?>
+                $.plot("#stockSplitChart", [
+                    { label: "In Stock", data: <?= (int) $inStockCount ?>, color: "#123A5C" },
+                    { label: "Sold", data: <?= (int) $soldCount ?>, color: "#16A34A" }
+                ], {
+                    series: {
+                        pie: {
+                            show: true,
+                            radius: 0.9,
+                            innerRadius: 0.6,
+                            stroke: { color: "#fff", width: 2 },
+                            label: { show: false }
+                        }
+                    },
+                    grid: { hoverable: true },
+                    tooltip: true,
+                    tooltipOpts: { content: "%s: %y", shifts: { x: -30, y: -40 } }
+                });
+                <?php else: ?>
+                $("#stockSplitChart").html('<div class="table-empty-state" style="padding:24px 8px;"><span class="icon24 icomoon-icon-cars"></span><strong>No inventory data yet</strong></div>');
+                <?php endif; ?>
+            });
+        </script>
 
     </body>
 </html>
