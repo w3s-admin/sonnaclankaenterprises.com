@@ -30,7 +30,7 @@ class ControlPadDB
     {
         // global variables used to connect to MySQL server
         $mysqlHost = 'localhost';
-        $mysqlPort = '3307';
+        $mysqlPort = '3306';
         //$dbUser = "root";
         //$dbPwd = "nuwan123";
         $dbName = 'sonnaclankaenterprises';
