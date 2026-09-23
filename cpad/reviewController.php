@@ -3,6 +3,7 @@
 require_once 'clsCommonBase.php';
 require_once 'clsReview.php';
 require_once 'common/HTTP_Upload.php';
+require_once 'clsS3Storage.php';
 
 $myCon = new ControlPadDB;
 $dbh = $myCon->dbh;
@@ -100,6 +101,14 @@ function uploadReviewFile($post) {
     }
 
     if (!empty($allfiles)) {
+        $localPath = $allfiles[0]['path'] . $allfiles[0]['name'];
+        if (S3Storage::isConfigured()) {
+            $uploaded = S3Storage::uploadSplit($localPath, 'reviews', $allfiles[0]['name']);
+            if ($uploaded) {
+                @unlink($localPath);
+                return $uploaded;
+            }
+        }
         return [
             'name' => $allfiles[0]['name'],
             'path' => 'admincontent/review/'
@@ -159,12 +168,14 @@ if (isset($_POST['review_edit_btn'])) {
 if (isset($_POST['review_delete_btn'])) {
     $reviewID = CommonBase::decrypt($_POST['rid']);
     if (is_numeric($reviewID)) {
-        $stmt_select = $dbh->prepare("SELECT image_path FROM review WHERE Id = ?");
+        // Was selecting only image_path (the folder, e.g. "admincontent/review/")
+        // and passing that alone to file_exists()/unlink() - never the actual
+        // filename, so a review's image was never really deleted from disk.
+        $stmt_select = $dbh->prepare("SELECT image_name, image_path FROM review WHERE Id = ?");
         $stmt_select->execute([$reviewID]);
-        $image_path = $stmt_select->fetchColumn();
-
-        if ($image_path && file_exists($image_path)) {
-            unlink($image_path);
+        $image_row = $stmt_select->fetch(PDO::FETCH_ASSOC);
+        if ($image_row) {
+            CommonBase::deleteStoredFile($image_row['image_path'] . $image_row['image_name']);
         }
 
         $stmt_delete = $dbh->prepare("DELETE FROM review WHERE Id = ?");

@@ -9,6 +9,7 @@ require_once 'clsCommonBase.php';
 require_once 'common/HTTP_Upload.php';
 require_once 'Thumbnail.class.php';
 require_once 'clsFrontVehicle.php';
+require_once 'clsS3Storage.php';
 
 
 $myCon = new ControlPadDB;
@@ -323,7 +324,8 @@ if (isset($_POST['v_save_image'])) {
                 $thumb->img_watermark_Valing = 'BOTTOM';        // [OPTIONAL] set watermark vertical position, TOP | CENTER | BOTTOM
                 $thumb->img_watermark_Haling = 'RIGHT';
                 $thumb->process();               // generate image
-                $status = $thumb->save("../admincontent/v_img/thumb/" . $tempName);            // save your thumbnail to file
+                $thumbLocalPath = "../admincontent/v_img/thumb/" . $tempName;
+                $status = $thumb->save($thumbLocalPath);            // save your thumbnail to file
                 if ($status) {
                     $tempName = $value['name'];
                     $thumb = new Thumbnail($value['path'] . $value['name']);         // Contructor and set source image file
@@ -333,9 +335,27 @@ if (isset($_POST['v_save_image'])) {
                     $thumb->img_watermark_Valing = 'BOTTOM';        // [OPTIONAL] set watermark vertical position, TOP | CENTER | BOTTOM
                     $thumb->img_watermark_Haling = 'RIGHT';
                     $thumb->process();               // generate image
-                    $status = $thumb->save("../admincontent/v_img/" . $tempName);            // save your thumbnail to file
+                    $mainLocalPath = "../admincontent/v_img/" . $tempName;
+                    $status = $thumb->save($mainLocalPath);            // save your thumbnail to file
                 }
-                $done = $stmt->execute(array($last_id, $tempName, "admincontent/v_img/", "admincontent/v_img/thumb/"));
+
+                // S3 when configured (see cpad/clsS3Storage.php); falls back
+                // to the existing local admincontent/ storage otherwise, so
+                // this keeps working in environments without S3 set up.
+                $mpath = "admincontent/v_img/";
+                $tpath = "admincontent/v_img/thumb/";
+                if (S3Storage::isConfigured() && $status) {
+                    $mainUpload = S3Storage::uploadSplit($mainLocalPath, 'vehicles/main', $tempName, 'image/jpeg');
+                    $thumbUpload = S3Storage::uploadSplit($thumbLocalPath, 'vehicles/thumb', $tempName, 'image/jpeg');
+                    if ($mainUpload && $thumbUpload) {
+                        $mpath = $mainUpload['path'];
+                        $tpath = $thumbUpload['path'];
+                        @unlink($mainLocalPath);
+                        @unlink($thumbLocalPath);
+                    }
+                }
+
+                $done = $stmt->execute(array($last_id, $tempName, $mpath, $tpath));
                 if ($done) {
                     unlink('../admincontent/v_img/default/' . $tempName);
                 }
@@ -493,10 +513,8 @@ if (isset($_POST['del_adv'])) {
 
         foreach ($img_arr as $value) {
             $prv_image = Vehicle::getImageById($value['Id']);
-            $thumb_IMG = "../" . $prv_image['tpath'] . $prv_image['image_name'];
-            $main_IMG = "../" . $prv_image['mpath'] . $prv_image['image_name'];
-            unlink($thumb_IMG);
-            unlink($main_IMG);
+            CommonBase::deleteStoredFile($prv_image['tpath'] . $prv_image['image_name']);
+            CommonBase::deleteStoredFile($prv_image['mpath'] . $prv_image['image_name']);
         }
         $stmt = $dbh->prepare("DELETE FROM advert_images WHERE fk_advert = ? ");
         $done = $stmt->execute(array($id));
@@ -513,13 +531,11 @@ if (isset($_POST['DelImg'])) {
     $id = CommonBase::decrypt($Id);
     if (is_numeric($id)) {
         $prv_image = Vehicle::getImageById($id);
-        $thumb_IMG = "../" . $prv_image['tpath'] . $prv_image['image_name'];
-        $main_IMG = "../" . $prv_image['mpath'] . $prv_image['image_name'];
         $stmt = $dbh->prepare("DELETE FROM advert_images WHERE `Id` = ? ");
         $done = $stmt->execute(array($id));
         if ($done) {
-            unlink($thumb_IMG);
-            unlink($main_IMG);
+            CommonBase::deleteStoredFile($prv_image['tpath'] . $prv_image['image_name']);
+            CommonBase::deleteStoredFile($prv_image['mpath'] . $prv_image['image_name']);
             $shop_save_msg = CommonBase::createMassageDiv(
                             $type = 'suc', $headding = 'Successfully Deleted', $massage = 'Advert Image deleted successfully ', 0);
         }
@@ -568,8 +584,6 @@ if (isset($_POST['updateImage'])) {
 
         $prv_image = Vehicle::getImageById($id);
 
-        $thumb_IMG = "../" . $prv_image['tpath'] . $prv_image['image_name'];
-        $main_IMG = "../" . $prv_image['mpath'] . $prv_image['image_name'];
         $stmt = $dbh->prepare("Update advert_images SET image_name=? , mpath=?  ,tpath=? , `_status`=1 WHERE `Id` = ?  ");
         foreach ($allfiles as $key => $value) {
             if (file_exists($value['path'] . $value['name'])) {
@@ -581,7 +595,8 @@ if (isset($_POST['updateImage'])) {
                 $thumb->img_watermark_Valing = 'BOTTOM';        // [OPTIONAL] set watermark vertical position, TOP | CENTER | BOTTOM
                 $thumb->img_watermark_Haling = 'RIGHT';
                 $thumb->process();               // generate image
-                $status = $thumb->save("../admincontent/v_img/thumb/" . $tempName);            // save your thumbnail to file
+                $thumbLocalPath = "../admincontent/v_img/thumb/" . $tempName;
+                $status = $thumb->save($thumbLocalPath);            // save your thumbnail to file
                 if ($status) {
                     $tempName = $value['name'];
                     $thumb = new Thumbnail($value['path'] . $value['name']);         // Contructor and set source image file
@@ -591,13 +606,28 @@ if (isset($_POST['updateImage'])) {
                     $thumb->img_watermark_Valing = 'BOTTOM';        // [OPTIONAL] set watermark vertical position, TOP | CENTER | BOTTOM
                     $thumb->img_watermark_Haling = 'RIGHT';
                     $thumb->process();               // generate image
-                    $status = $thumb->save("../admincontent/v_img/" . $tempName);            // save your thumbnail to file
+                    $mainLocalPath = "../admincontent/v_img/" . $tempName;
+                    $status = $thumb->save($mainLocalPath);            // save your thumbnail to file
                 }
-                $done = $stmt->execute(array($tempName, "admincontent/v_img/", "admincontent/v_img/thumb/", $id));
+
+                $mpath = "admincontent/v_img/";
+                $tpath = "admincontent/v_img/thumb/";
+                if (S3Storage::isConfigured() && $status) {
+                    $mainUpload = S3Storage::uploadSplit($mainLocalPath, 'vehicles/main', $tempName, 'image/jpeg');
+                    $thumbUpload = S3Storage::uploadSplit($thumbLocalPath, 'vehicles/thumb', $tempName, 'image/jpeg');
+                    if ($mainUpload && $thumbUpload) {
+                        $mpath = $mainUpload['path'];
+                        $tpath = $thumbUpload['path'];
+                        @unlink($mainLocalPath);
+                        @unlink($thumbLocalPath);
+                    }
+                }
+
+                $done = $stmt->execute(array($tempName, $mpath, $tpath, $id));
                 if ($done) {
                     unlink('../admincontent/v_img/default/' . $tempName);
-                    unlink($thumb_IMG);
-                    unlink($main_IMG);
+                    CommonBase::deleteStoredFile($prv_image['tpath'] . $prv_image['image_name']);
+                    CommonBase::deleteStoredFile($prv_image['mpath'] . $prv_image['image_name']);
                 }
             }
             if ($done) {

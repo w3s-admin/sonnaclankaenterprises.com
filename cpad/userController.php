@@ -6,6 +6,7 @@ require_once 'clsUser.php';
 //require_once 'capcha/securimage.php';
 //require_once 'mailController.php';
 require_once 'common/HTTP_Upload.php';
+require_once 'clsS3Storage.php';
 
 $myCon = new ControlPadDB;
 
@@ -104,9 +105,18 @@ if (isset($_POST['upload_user_image'])) {
             }
         }
         if (!empty($allfiles)) {
-
+            $fileName = $allfiles[0]['name'];
+            $filePath = 'admincontent/system_admin/';
+            if (S3Storage::isConfigured()) {
+                $uploaded = S3Storage::uploadSplit($allfiles[0]['path'] . $allfiles[0]['name'], 'avatars', $fileName);
+                if ($uploaded) {
+                    @unlink($allfiles[0]['path'] . $allfiles[0]['name']);
+                    $fileName = $uploaded['name'];
+                    $filePath = $uploaded['path'];
+                }
+            }
             $stmt = $dbh->prepare("Update system_admin set file_name = ? ,file_path=? WHERE `Id`=?");
-            $done = $stmt->execute(array($allfiles[0]['name'], 'admincontent/system_admin/', $userID));
+            $done = $stmt->execute(array($fileName, $filePath, $userID));
             if ($done) {
                 $save_msg = CommonBase::createMassageDiv(
                                 $type = 'suc', $headding = "Image Uploded", $massage = "Image uploaded sucsessfully", 0);
@@ -170,10 +180,20 @@ if (isset($_POST['user_upload_change'])) {
         }
         if (!empty($allfiles)) {
             $user = User::getUserById($userID);
+            $fileName = $allfiles[0]['name'];
+            $filePath = 'admincontent/system_admin/';
+            if (S3Storage::isConfigured()) {
+                $uploaded = S3Storage::uploadSplit($allfiles[0]['path'] . $allfiles[0]['name'], 'avatars', $fileName);
+                if ($uploaded) {
+                    @unlink($allfiles[0]['path'] . $allfiles[0]['name']);
+                    $fileName = $uploaded['name'];
+                    $filePath = $uploaded['path'];
+                }
+            }
             $stmt = $dbh->prepare("Update system_admin set file_name = ? , file_path=? WHERE `Id`=?");
-            $done = $stmt->execute(array($allfiles[0]['name'], 'admincontent/system_admin/', $userID));
+            $done = $stmt->execute(array($fileName, $filePath, $userID));
             if ($done) {
-                unlink("../" . $user['file_path'] . $user['file_name']);
+                CommonBase::deleteStoredFile($user['file_path'] . $user['file_name']);
                 $save_msg = CommonBase::createMassageDiv(
                                 $type = 'suc', $headding = "Image Uplode Changed", $massage = "Image upload Changed and notify Users(s)", 0);
                 echo CommonBase::refreshMotherwithouturlFancyTimeOut(3000);
@@ -195,10 +215,10 @@ if (isset($_POST['user_upload_rmv'])) {
         $done = $stmt->execute(array($userID));
         if ($done) {
 
-            unlink("../" . $user['file_path'] . $user['file_name']);
+            CommonBase::deleteStoredFile($user['file_path'] . $user['file_name']);
             $save_msg = CommonBase::createMassageDiv(
                             $type = 'suc', $headding = "Image Uplode Removed", $massage = "Image upload Removed and notify Users(s)", 0);
-           
+
         }
     }
 }

@@ -1,5 +1,9 @@
 /node_modules/*
 
+# Composer dependencies (AWS SDK, phpdotenv) - run `composer install` on
+# deploy rather than committing these; see composer.json.
+/vendor/
+
 # Login/activity logs contain IPs, usernames and user-agents; they don't
 # belong in version control. (Files already committed under logs/ before
 # this rule was added are still tracked - see the QA report for how to

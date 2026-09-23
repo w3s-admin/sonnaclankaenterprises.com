@@ -174,6 +174,26 @@ class CommonBase {
     }
 
     /**
+     * Deletes a stored upload given its already-concatenated reference
+     * (e.g. $row['tpath'] . $row['image_name']) - transparently routes to
+     * S3 or a local unlink() depending on which one it actually is, so
+     * every existing "unlink($thumb_IMG)"-style call site only needs its
+     * unlink() swapped for this. $localPrefix is prepended for local paths
+     * only (existing callers pass "../" since they run from systemadmin/).
+     */
+    public static function deleteStoredFile($reference, $localPrefix = '../') {
+        if (empty($reference)) {
+            return false;
+        }
+        if (strpos($reference, 's3-image.php?key=') !== false) {
+            require_once __DIR__ . '/clsS3Storage.php';
+            return S3Storage::deleteByUrl($reference);
+        }
+        $path = $localPrefix . $reference;
+        return is_file($path) ? @unlink($path) : false;
+    }
+
+    /**
      * Verifies an authenticated admin session.
      * Unlike the legacy implementation, this NEVER falls through to caller code
      * when the session check fails: it halts the request immediately, so it is
