@@ -1,5 +1,18 @@
+# This entire directory is legacy/superseded content (old site version,
+# including a page with a hardcoded third-party login auto-submitted in
+# plaintext, and copies of the pre-PDO vehicle/contact pages). Nothing in the
+# current site links here. Blocked outright rather than relying on it simply
+# being unlinked, since an unlinked-but-reachable URL is still reachable.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
 RewriteEngine  on
- 
+
 RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/(.*).html$ vehicle.php?vid=$1
 RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/images/(.*)$  images/$2
 RewriteRule ^kaduwela-enterprises-selleing-vehicle-details-srilanka/(.*)/css/(.*)$  css/$2

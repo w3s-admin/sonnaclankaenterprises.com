@@ -1,6 +1,10 @@
 <?
 require_once '../cpad/reviewController.php';
 CommonBase::IsAdminUser("user_curd");
+if (!isset($save_msg) && !empty($_SESSION['_flash_save_msg'])) {
+    $save_msg = $_SESSION['_flash_save_msg'];
+    unset($_SESSION['_flash_save_msg']);
+}
 $save_msg = $save_msg ?? null;
 $name = $name ?? null;
 $title = $title ?? null;
@@ -124,7 +128,7 @@ $comment = $comment ?? null;
 
                                         <div class="span12">
                                             <?= ($save_msg != NULL) ? "$save_msg" : "" ?>
-                                            <?= (isset($_GET['save_msg'])) ? CommonBase::decrypt($_GET['save_msg']) : "" ?>
+                                            <?= (isset($_GET['save_msg'])) ? htmlspecialchars(CommonBase::decrypt($_GET['save_msg']), ENT_QUOTES, 'UTF-8') : "" ?>
                                         </div>
 
                                         <div class="row-fluid">
@@ -134,7 +138,7 @@ $comment = $comment ?? null;
                                                     <div class="span12">
                                                         <div class="row-fluid">
                                                             <label class="form-label span4 red" for="name">Name</label>
-                                                            <input class="span6 required" id="name" name="name" value="<?= $name ?>"  type="text" />
+                                                            <input class="span6 required" id="name" name="name" value="<?= htmlspecialchars($name ?? '', ENT_QUOTES, 'UTF-8') ?>"  type="text" />
                                                         </div>
                                                     </div>
                                                 </div> 
@@ -143,7 +147,7 @@ $comment = $comment ?? null;
                                                     <div class="span12">
                                                         <div class="row-fluid">
                                                             <label class="form-label span4 red" for="name">Title</label>
-                                                            <input class="span6 required" id="title" name="title"  value="<?= $title ?>" type="text" />
+                                                            <input class="span6 required" id="title" name="title"  value="<?= htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8') ?>" type="text" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -152,7 +156,7 @@ $comment = $comment ?? null;
                                                     <div class="span12">
                                                         <div class="row-fluid">
                                                             <label class="form-label span4 red" for="name">Country</label>
-                                                            <input class="span6" id="country" name="country"  value="<?= ${'country'} ?>" type="text" />
+                                                            <input class="span6" id="country" name="country"  value="<?= htmlspecialchars($country ?? '', ENT_QUOTES, 'UTF-8') ?>" type="text" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -161,7 +165,7 @@ $comment = $comment ?? null;
                                                     <div class="span12">
                                                         <div class="row-fluid">
                                                             <label class="form-label span4 red" for="name">Comment</label>
-                                                            <textarea rows="5" id="textarea" name="comment" class="span6 uniform"><?= ${'comment'} ?></textarea>
+                                                            <textarea rows="5" id="textarea" name="comment" class="span6 uniform"><?= htmlspecialchars($comment ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                                                         </div>
                                                     </div>
                                                 </div>

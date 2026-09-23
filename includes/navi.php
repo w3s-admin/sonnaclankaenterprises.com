@@ -284,7 +284,7 @@ function isPageActive($page_name)
         </div>
         <h3 data-motion="reveal">Sonnac Lanka Enterprises</h3>
         <p class="comp-desc" data-motion="reveal">
-            Established in 2003, Sonnac Lanka Enterprises has proudly served as a trusted Japanese used-vehicle importer and exporter, supplying over 1,500 vehicles to customers across Sri Lanka and beyond.
+            Established in 2003, Sonnac Lanka Enterprises has proudly served as a trusted used-vehicle importer and exporter, supplying over 1,500 vehicles to customers across Sri Lanka and beyond.
         </p>
         <ul class="contact-box list-style" data-motion="reveal">
             <li>

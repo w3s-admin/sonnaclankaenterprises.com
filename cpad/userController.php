@@ -10,8 +10,38 @@ require_once 'common/HTTP_Upload.php';
 $myCon = new ControlPadDB;
 
 $dbh = $myCon->dbh;
-extract($_POST);
-$sadmin = $sadmin ?? null;
+
+// Staff-account management is admin-only and this file is directly web
+// requestable (cpad/ has no deny rule), so it must gate itself rather than
+// rely solely on the calling page's own check. Per docs/05-staff-accounts.md,
+// "Super Admin" is the only access boundary this app currently enforces
+// reliably, and creating/editing/deleting *other* staff logins (including
+// granting super_admin itself) is exactly the kind of "full control" action
+// that doc says should be limited to people who genuinely need it - so the
+// whole User Manager module requires an existing super admin, not just any
+// logged-in admin.
+$currentAdmin = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentAdmin = CommonBase::IsAdminUser('super_admin');
+    CommonBase::requireValidCsrf();
+}
+
+$fname = isset($_POST['fname']) ? trim($_POST['fname']) : null;
+$lname = isset($_POST['lname']) ? trim($_POST['lname']) : null;
+$uname = isset($_POST['uname']) ? trim($_POST['uname']) : null;
+$email = isset($_POST['email']) ? trim($_POST['email']) : null;
+$email_password = isset($_POST['email_password']) ? $_POST['email_password'] : null;
+$password = isset($_POST['password']) ? $_POST['password'] : null;
+$cpassword = isset($_POST['cpassword']) ? $_POST['cpassword'] : null;
+$other = isset($_POST['other']) ? $_POST['other'] : null;
+$contact_number = isset($_POST['contact_number']) ? $_POST['contact_number'] : null;
+
+// Only an existing super admin may grant/keep super_admin on any account -
+// this used to be settable by any logged-in admin via a plain POST field.
+$sadmin = isset($_POST['sadmin']) ? $_POST['sadmin'] : null;
+if (empty($currentAdmin['super_admin'])) {
+    $sadmin = null;
+}
 
 
 if (isset($_POST['upload_user_image'])) {
@@ -28,7 +58,7 @@ if (isset($_POST['upload_user_image'])) {
         $file = $upload->getFiles();
         $allfiles = array();
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif", "JPG", "JPEG");
+            $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -41,7 +71,14 @@ if (isset($_POST['upload_user_image'])) {
 //                } else {
 //                    $dest_dir = 'admincontent/lc/';
 //                }
-                $dest_dir = 'admincontent/system_admin/';
+                // Was 'admincontent/system_admin/' (missing the '../'), which
+                // wrote new avatars to systemadmin/admincontent/system_admin/
+                // instead of the site-root admincontent/ directory that
+                // file_path='admincontent/system_admin/' (saved to the DB
+                // right below) and every later unlink()/<img src> assumes -
+                // the very first avatar a user ever uploaded 404'd on
+                // display and any later change/remove couldn't find it.
+                $dest_dir = '../admincontent/system_admin/';
                 if (@!is_dir($dest_dir)) {
                     mkdir($dest_dir);
                 }
@@ -93,7 +130,7 @@ if (isset($_POST['user_upload_change'])) {
         $file = $upload->getFiles();
         $allfiles = array();
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif", "JPG", "JPEG");
+            $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -199,22 +236,22 @@ if (isset($_POST['user_save_btn'])) {
      
 //        
         $now = CommonBase::getcurrenttime();
-        $quary = "INSERT INTO system_admin (firstname, lastname, username, `password`, email, `_status`, super_admin,  addu, addt,other,contact_number ) 
-	                VALUES (?, ?, ?, CONCAT('*', UPPER(SHA1(UNHEX(SHA1(?))))) , ?, ?,   ?, ? , ?,?,?) ";
-        $stmt = $dbh->prepare($quary);    
-      
+        $quary = "INSERT INTO system_admin (firstname, lastname, username, `password`, email, `_status`, super_admin,  addu, addt,other,contact_number )
+	                VALUES (?, ?, ?, ? , ?, ?,   ?, ? , ?,?,?) ";
+        $stmt = $dbh->prepare($quary);
+
         $done = $stmt->execute(array(
             $fname,
             $lname,
             $uname,
-            $password,
-            $email,            
+            password_hash($password, PASSWORD_BCRYPT),
+            $email,
             1,
             CommonBase::chktoDB($sadmin),
-            CommonBase::IsAdminUser()['Id'],
+            $currentAdmin['Id'],
             $now,
-            ${'other'},
-            ${'contact_number'}
+            $other,
+            $contact_number
         ));
       
         if ($done) {
@@ -228,9 +265,15 @@ if (isset($_POST['user_save_btn'])) {
                 
             }
             $shop_save_msg = CommonBase::createMassageDiv(
-                            $type = 'suc', $headding = 'Successfully added', $massage = 'Now User can login to the System using User Name : ' . $uname . ' and Password : ' . $password . '…….. ', 200);
-                           
-           CommonBase::SendRedirect(CommonBase::appendGettoURL("shop_save_msg", CommonBase::encrypt($shop_save_msg)));
+                            $type = 'suc', $headding = 'Successfully added', $massage = 'Now User can login to the System using User Name : ' . htmlspecialchars($uname, ENT_QUOTES, 'UTF-8') . ' and Password : ' . htmlspecialchars($password, ENT_QUOTES, 'UTF-8') . '…….. ', 200);
+
+            // Flashed via session (not the URL query string): the message
+            // above embeds a plaintext password, and this "encrypt" is a
+            // trivial reversible cipher, so putting it in the URL would leak
+            // the new user's password into server access logs, proxy logs
+            // and browser history.
+            $_SESSION['_flash_shop_save_msg'] = $shop_save_msg;
+            CommonBase::SendRedirect("user_add.php");
         }
     }
 }
@@ -273,12 +316,12 @@ if (isset($_POST['user_editbtn_btn'])) {
             $email_password,
             1,
             CommonBase::chktoDB($sadmin),
-            CommonBase::IsAdminUser()['Id'],
+            $currentAdmin['Id'],
             $now,
-          
-            ${'other'},
-            ${'contact_number'},  $userID
-                    
+
+            $other,
+            $contact_number,  $userID
+
         ));
         if ($done) {
 
@@ -312,10 +355,10 @@ if (isset($_POST['user_change_password'])) {
                         $type = 'err', $headding = "Error on Data", $massage = 'Password does not match or invalid password type', 0);
         $error = true;
     } else {
-        $stmt = $dbh->prepare("update system_admin set password = password(?) WHERE `Id` =? ");
+        $stmt = $dbh->prepare("update system_admin set password = ? WHERE `Id` =? ");
 
         $done = $stmt->execute(array(
-            $password, $userID
+            password_hash($password, PASSWORD_BCRYPT), $userID
         ));
         if ($done) {
             // $addedIdTemp = CommonBase::encrypt($dbh->lastInsertId());
@@ -360,6 +403,7 @@ if (isset($_POST['user_change_privilages'])) {
 }
 
 if (isset($_POST['del_user'])) {
+    $uid = isset($_POST['uid']) ? $_POST['uid'] : null;
     $del_userID = CommonBase::decrypt($uid);
     if (is_numeric($del_userID)) {
         $stmt = $dbh->prepare("Delete from system_admin_privilage WHERE fk_system_admin = ? ");

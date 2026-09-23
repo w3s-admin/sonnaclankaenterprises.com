@@ -13,6 +13,7 @@ class Paginator
 	var $return;
 	var $default_ipp = 6;
 	var $querystring;
+	var $selfUrl;
 
 	function __construct()
 	{
@@ -30,6 +31,13 @@ class Paginator
 			if (!is_numeric($this->items_per_page) || $this->items_per_page <= 0) {
 				$this->items_per_page = $this->default_ipp;
 			}
+			// Cast after the numeric check so a value like "1e2" (accepted by
+			// is_numeric but not valid in a SQL LIMIT clause) can't reach the
+			// query built below.
+			$this->items_per_page = (int) $this->items_per_page;
+			if ($this->items_per_page <= 0) {
+				$this->items_per_page = $this->default_ipp;
+			}
 			$this->num_pages = ceil($this->items_total / $this->items_per_page);
 		}
 
@@ -43,30 +51,39 @@ class Paginator
 		$prev_page = $this->current_page - 1;
 		$next_page = $this->current_page + 1;
 
-		if ($_GET) {
-			$args = explode("&", $_SERVER['QUERY_STRING']);
-			foreach ($args as $arg) {
-				$keyval = explode("=", $arg);
-				if ($keyval[0] != "page" && $keyval[0] != "ipp") {
-					$this->querystring .= "&" . $arg;
-				}
-			}
-		}
+		// $_SERVER['PHP_SELF'] can carry attacker-controlled extra path info
+		// (e.g. /page.php/"><script>...</script>), and it ends up embedded both
+		// in plain HTML attributes AND inside inline-JS string literals further
+		// down (display_items_per_page/display_jump_menu) - htmlspecialchars()
+		// alone isn't enough for that second context (the browser HTML-decodes
+		// attribute values before JS ever sees them, so an escaped quote can
+		// still break out of a JS string). A real PHP_SELF is always a plain
+		// filesystem/URL path, so it's simplest and safest to just strip it
+		// down to that regardless of where it gets used.
+		$this->selfUrl = preg_replace('/[^a-zA-Z0-9\/_\-\.]/', '', $_SERVER['PHP_SELF']);
+		$selfUrl = $this->selfUrl;
 
-		if ($_POST) {
-			foreach ($_POST as $key => $val) {
-				if ($key != "page" && $key != "ipp") {
-					$this->querystring .= "&$key=$val";
-				}
-			}
+		// Rebuilt from $_GET/$_POST via http_build_query() (which percent-encodes
+		// every value) rather than raw QUERY_STRING/`$key=$val` concatenation -
+		// the old version copied attacker-controlled request data straight into
+		// HTML attributes and inline JS strings below with no escaping at all,
+		// making every pagination link a reflected-XSS vector.
+		$extraParams = array();
+		if ($_GET) {
+			$extraParams = $_GET;
 		}
+		if ($_POST) {
+			$extraParams = array_merge($extraParams, $_POST);
+		}
+		unset($extraParams['page'], $extraParams['ipp']);
+		$this->querystring = $extraParams ? '&' . http_build_query($extraParams) : '';
 
 		$this->return = '<ul class="page-nav list-style">';
 
 		if ($this->num_pages > 10) {
 			// Add previous page link
 			if ($this->current_page != 1 && $this->items_total >= 10) {
-				$this->return .= '<li><a class="paginate" href="' . $_SERVER['PHP_SELF'] . '?page=' . $prev_page . '&ipp=' . $this->items_per_page . $this->querystring . '">&laquo; Previous</a></li>';
+				$this->return .= '<li><a class="paginate" href="' . $selfUrl . '?page=' . $prev_page . '&ipp=' . $this->items_per_page . $this->querystring . '">&laquo; Previous</a></li>';
 			} else {
 				$this->return .= '<li><a class="inactive" href="#">&laquo; Previous</a></li>';
 			}
@@ -93,7 +110,7 @@ class Paginator
 					if ($i == $this->current_page && $_GET['page'] != 'All') {
 						$this->return .= '<li><a title="Go to page ' . $i . ' of ' . $this->num_pages . '" class="current active" href="#">' . $i . '</a></li>';
 					} else {
-						$this->return .= '<li><a class="paginate" title="Go to page ' . $i . ' of ' . $this->num_pages . '" href="' . $_SERVER['PHP_SELF'] . '?page=' . $i . '&ipp=' . $this->items_per_page . $this->querystring . '">' . $i . '</a></li>';
+						$this->return .= '<li><a class="paginate" title="Go to page ' . $i . ' of ' . $this->num_pages . '" href="' . $selfUrl . '?page=' . $i . '&ipp=' . $this->items_per_page . $this->querystring . '">' . $i . '</a></li>';
 					}
 				}
 				if ($this->range[$this->mid_range - 1] < $this->num_pages - 1 && $i == $this->range[$this->mid_range - 1]) {
@@ -103,17 +120,17 @@ class Paginator
 
 			// Add next page link
 			if (($this->current_page != $this->num_pages && $this->items_total >= 10) && ($_GET['page'] != 'All')) {
-				$this->return .= '<li><a class="paginate" href="' . $_SERVER['PHP_SELF'] . '?page=' . $next_page . '&ipp=' . $this->items_per_page . $this->querystring . '">Next &raquo;</a></li>';
+				$this->return .= '<li><a class="paginate" href="' . $selfUrl . '?page=' . $next_page . '&ipp=' . $this->items_per_page . $this->querystring . '">Next &raquo;</a></li>';
 			} else {
 				$this->return .= '<li><a class="inactive" href="#">&raquo; Next</a></li>';
 			}
 
-			$this->return .= ($_GET['page'] == 'All') ? '<li><a class="current active" style="margin-left:10px" href="#">All2</a></li>' : '<li><a class="paginate" style="margin-left:10px" href="' . $_SERVER['PHP_SELF'] . '?page=1&ipp=All' . $this->querystring . '">All</a></li>';
+			$this->return .= ($_GET['page'] == 'All') ? '<li><a class="current active" style="margin-left:10px" href="#">All2</a></li>' : '<li><a class="paginate" style="margin-left:10px" href="' . $selfUrl . '?page=1&ipp=All' . $this->querystring . '">All</a></li>';
 		} else {
 			for ($i = 1; $i <= $this->num_pages; $i++) {
-				$this->return .= ($i == $this->current_page) ? '<li><a class="current active" href="#">' . $i . '</a></li>' : '<li><a class="paginate" href="' . $_SERVER['PHP_SELF'] . '?page=' . $i . '&ipp=' . $this->items_per_page . $this->querystring . '">' . $i . '</a></li>';
+				$this->return .= ($i == $this->current_page) ? '<li><a class="current active" href="#">' . $i . '</a></li>' : '<li><a class="paginate" href="' . $selfUrl . '?page=' . $i . '&ipp=' . $this->items_per_page . $this->querystring . '">' . $i . '</a></li>';
 			}
-			$this->return .= '<li><a class="paginate" href="' . $_SERVER['PHP_SELF'] . '?page=1&ipp=All' . $this->querystring . '">All</a></li>';
+			$this->return .= '<li><a class="paginate" href="' . $selfUrl . '?page=1&ipp=All' . $this->querystring . '">All</a></li>';
 		}
 
 		$this->return .= '</ul>';
@@ -129,7 +146,8 @@ class Paginator
 		$items = '';
 		$ipp_array = array(10, 25, 50, 100);
 		foreach ($ipp_array as $ipp_opt)	$items .= ($ipp_opt == $this->items_per_page) ? "<option selected value=\"$ipp_opt\">$ipp_opt</option>\n" : "<option value=\"$ipp_opt\">$ipp_opt</option>\n";
-		return "<span class=\"paginate\">Items per page:</span><select class=\"paginate span1\" onchange=\"window.location='$_SERVER[PHP_SELF]?page=1&ipp='+this[this.selectedIndex].value+'$this->querystring';return false\">$items</select>\n";
+		$self = $this->selfUrl ?: preg_replace('/[^a-zA-Z0-9\/_\-\.]/', '', $_SERVER['PHP_SELF']);
+		return "<span class=\"paginate\">Items per page:</span><select class=\"paginate span1\" onchange=\"window.location='$self?page=1&ipp='+this[this.selectedIndex].value+'$this->querystring';return false\">$items</select>\n";
 	}
 
 	function display_jump_menu()
@@ -137,7 +155,8 @@ class Paginator
 		for ($i = 1; $i <= $this->num_pages; $i++) {
 			$option .= ($i == $this->current_page) ? "<option value=\"$i\" selected>$i</option>\n" : "<option value=\"$i\">$i</option>\n";
 		}
-		return "<span class=\"paginate\">Page:</span><select class=\"paginate span1\" onchange=\"window.location='$_SERVER[PHP_SELF]?page='+this[this.selectedIndex].value+'&ipp=$this->items_per_page$this->querystring';return false\">$option</select>\n";
+		$self = $this->selfUrl ?: preg_replace('/[^a-zA-Z0-9\/_\-\.]/', '', $_SERVER['PHP_SELF']);
+		return "<span class=\"paginate\">Page:</span><select class=\"paginate span1\" onchange=\"window.location='$self?page='+this[this.selectedIndex].value+'&ipp=$this->items_per_page$this->querystring';return false\">$option</select>\n";
 	}
 
 	function display_pages()

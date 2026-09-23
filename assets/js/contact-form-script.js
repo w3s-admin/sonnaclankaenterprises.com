@@ -26,7 +26,11 @@
         $.ajax({
             type: "POST",
             url: "assets/php/form-process.php",
-            data: "name=" + name + "&email=" + email + "&msg_subject=" + msg_subject + "&phone_number=" + phone_number + "&message=" + message +"&gridCheck=" + gridCheck,
+            // encodeURIComponent() on every value: the previous plain
+            // concatenation meant an "&" or "=" typed into e.g. the message
+            // box (very plausible - people write "Q&A", "price=X" etc.) broke
+            // the request into unrelated extra fields once PHP parsed it.
+            data: "name=" + encodeURIComponent(name) + "&email=" + encodeURIComponent(email) + "&msg_subject=" + encodeURIComponent(msg_subject) + "&phone_number=" + encodeURIComponent(phone_number) + "&message=" + encodeURIComponent(message) + "&gridCheck=" + encodeURIComponent(gridCheck),
             success : function(statustxt){
                 if (statustxt == "success"){
                     formSuccess();

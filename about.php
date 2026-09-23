@@ -3,7 +3,7 @@
 
 <head>
     <?php
-    $pageTitle = "About Sonnac Lanka Enterprises - Trusted Japanese Vehicle Exporter Since 2003";
+    $pageTitle = "About Sonnac Lanka Enterprises - Trusted Quality Vehicle Exporter Since 2003";
     $sleYearsInBusiness = date('Y') - 2003;
     include_once('./includes/head.php'); ?>
 </head>
@@ -430,7 +430,7 @@
             <div class="about-story-grid">
                 <div class="about-gallery" data-motion="reveal">
                     <img src="assets/img/about/about-shape-1.webp" alt="" class="about-gallery-shape" data-motion="parallax" data-parallax-speed="0.12">
-                    <img src="assets/img/about/about-img-1.webp" alt="Inspected Japanese import vehicle" class="about-gallery-img about-gallery-img-1">
+                    <img src="assets/img/about/about-img-1.webp" alt="Inspected import vehicle" class="about-gallery-img about-gallery-img-1">
                     <img src="assets/img/about/about-img-2.webp" alt="Vehicle prepared for export" class="about-gallery-img about-gallery-img-2">
                     <div class="about-gallery-badge">
                         <i class="ri-award-fill"></i>
@@ -442,16 +442,16 @@
                 </div>
                 <div class="about-copy" data-motion="reveal">
                     <span class="brand-eyebrow">Who We Are</span>
-                    <h2>A Trusted Name In Japanese Vehicle Imports Since 2003</h2>
-                    <p>Sonnac Lanka Enterprises was established in 2003 as a Japanese used-vehicle importer, exporter, and auction-bidding support coordinator. Over the years we've built a strong reputation among customers who value straight answers and vehicles that arrive exactly as described.</p>
-                    <p>We stay closely tuned to both the Sri Lankan and international automobile markets, working directly with Japanese auction houses so we're able to source, purchase, and move a vehicle within hours when the right one comes up — no unnecessary delays, no unnecessary middlemen.</p>
+                    <h2>A Trusted Name In Quality Vehicle Imports Since 2003</h2>
+                    <p>Sonnac Lanka Enterprises was established in 2003 as a used-vehicle importer, exporter, and auction-bidding support coordinator. Over the years we've built a strong reputation among customers who value straight answers and vehicles that arrive exactly as described.</p>
+                    <p>We stay closely tuned to both the Sri Lankan and international automobile markets, working directly with overseas auction houses so we're able to source, purchase, and move a vehicle within hours when the right one comes up — no unnecessary delays, no unnecessary middlemen.</p>
                     <p>Today we operate from our office on Galle Road in Colombo, and to date we've supplied more than 1,500 vehicles to customers across Sri Lanka and beyond. Every purchase is backed by our team directly — real people you can call, not a support ticket queue.</p>
                     <div class="about-feature-list" data-motion-group>
                         <div class="about-feature-item" data-motion="grid-item">
                             <i class="ri-auction-line"></i>
                             <div>
                                 <h4>Direct Auction Access</h4>
-                                <p>We bid and buy directly at Japanese vehicle auctions.</p>
+                                <p>We bid and buy directly at overseas vehicle auctions.</p>
                             </div>
                         </div>
                         <div class="about-feature-item" data-motion="grid-item">

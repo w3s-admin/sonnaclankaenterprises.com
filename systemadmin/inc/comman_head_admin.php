@@ -1,6 +1,7 @@
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><?= $_SESSION['app_pro']['sys_title'] ?></title>
+<meta name="csrf-token" content="<?= htmlspecialchars(CommonBase::csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+<title><?= htmlspecialchars($_SESSION['app_pro']['sys_title'] ?? '', ENT_QUOTES, 'UTF-8') ?></title>
 
 <meta name="robots" content="noindex">
 <meta name="googlebot" content="noindex">

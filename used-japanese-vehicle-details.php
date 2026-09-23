@@ -1,21 +1,24 @@
 <?
 require 'cpad/vehicleController.php';
 
-$cid = $cid ?? null;
+// Always reset $cid here rather than `?? null`: vehicleController.php's
+// extract($_GET) can already have set $cid straight from a "?cid=..." query
+// parameter, which would otherwise skip the decrypt()/is_numeric() check
+// below entirely and let a crafted link fetch/display an arbitrary vehicle
+// (or a non-numeric value that breaks the FrontVehicle lookup further down).
+$cid = null;
 
 if (isset($_GET['id'])) {
-
     $id = CommonBase::decrypt($_GET['id']);
-
     if (is_numeric($id)) {
-
         $cid = $id;
-    } else {
-
-        echo CommonBase::closeWindow();
     }
 }
-$row = Vehicle::getvehicleByID($cid);
+
+$row = $cid !== null ? Vehicle::getvehicleByID($cid) : null;
+if (!$row) {
+    CommonBase::SendRedirect('used_japanese_vehicles.php');
+}
 $vehicle =  new FrontVehicle($row);
 
 
@@ -461,7 +464,7 @@ $vehicle =  new FrontVehicle($row);
                                 <?php
                                 foreach ($vehicle->images as $key => $value) {
                                     echo "<a class='instagram-card' href='$value[main]' target='blank'  data-fancybox='gallery' >
-                                    <img src='$value[main]' alt='" . htmlspecialchars($vehicle->title) . "'>
+                                    <img src='$value[main]' alt='" . $vehicle->title . "'>
                                     <span><i class='fas fa-search'></i></span>
                                 </a>";
                                 } ?>
@@ -470,22 +473,31 @@ $vehicle =  new FrontVehicle($row);
                         </div>
                         <div class="vd-contact-card" data-motion="reveal">
                             <h3 class="vd-widget-title">Enquire About This Vehicle</h3>
-                            <form id="contactForm">
+                            <form id="inquiryForm">
+                                <input type="hidden" name="vid" value="<?= htmlspecialchars($_GET['id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                <!-- Honeypot: real visitors never see or fill this; a bot that fills every field it finds gets silently ignored server-side. -->
+                                <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                                    <label for="inquiryGridCheck">Leave this field empty</label>
+                                    <input type="text" name="gridCheck" id="inquiryGridCheck" tabindex="-1" autocomplete="off">
+                                </div>
                                 <div class="form-group">
-                                    <input type="text" name="name" placeholder="Name" id="name" required data-error="Please enter your name">
+                                    <input type="text" name="name" placeholder="Name" id="inquiryName" required data-error="Please enter your name">
                                     <div class="help-block with-errors"></div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="email" name="email" id="email" required placeholder="Email" data-error="Please enter your email">
+                                    <input type="email" name="email" id="inquiryEmail" required placeholder="Email" data-error="Please enter your email">
                                     <div class="help-block with-errors"></div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="phone" id="inquiryPhone" placeholder="Phone (optional)">
                                 </div>
                                 <div class="form-group v1">
-                                    <textarea name="message" id="message" placeholder="Your Messages.." cols="30" rows="6" required data-error="Please enter your message"></textarea>
+                                    <textarea name="message" id="inquiryMessage" placeholder="Your Messages.." cols="30" rows="6" required data-error="Please enter your message"></textarea>
                                     <div class="help-block with-errors"></div>
                                 </div>
                                 <button type="submit" class="btn-brand btn-brand-primary">Send Enquiry</button>
                                 <br><br>
-                                <div id="msgSubmit" class="h3 text-center hidden  "></div>
+                                <div id="inquiryMsgSubmit" class="h3 text-center hidden  "></div>
                                 <div class="clearfix"></div>
                             </form>
                         </div>
@@ -507,6 +519,7 @@ $vehicle =  new FrontVehicle($row);
     <!-- Footer Section End -->
 
     <?php include_once('./includes/script.php'); ?>
+    <script src="assets/js/inquiry-form-script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
     <script>
         $('[data-fancybox="gallery"]').fancybox({

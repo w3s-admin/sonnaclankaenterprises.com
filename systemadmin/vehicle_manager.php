@@ -6,6 +6,12 @@ CommonBase::IsAdminUser();
 //   unset($_SESSION['app_pro']);
 // var_dump($_SESSION['app_pro']['main_company_name']);exit;
 
+$del_msg = null;
+if (!empty($_SESSION['_flash_del_msg'])) {
+    $del_msg = $_SESSION['_flash_del_msg'];
+    unset($_SESSION['_flash_del_msg']);
+}
+
 $Stock = $Stock ?? null;
 $Category = $Category ?? null;
 $BodyType = $BodyType ?? null;
@@ -99,7 +105,7 @@ $id = $id ?? null;
 
             });</script>
 
-        <?= (isset($del_msg)) ? CommonBase::decrypt($del_msg) : "" ?>
+        <?= ($del_msg != null) ? $del_msg : "" ?>
     </head>
 
     <body>
@@ -331,7 +337,7 @@ $id = $id ?? null;
                                         </thead>
                                         <tbody>
                                             <?
-                                            $task_list = Vehicle::getAll_vehicle_search($_GET);
+                                            $task_list = Vehicle::getAll_vehicle_search($_GET, false, true);
 
                                             while ($row = $task_list->fetch(PDO::FETCH_ASSOC)) {
                                                 $img = Vehicle::getFirastimage($row['Id']);

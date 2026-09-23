@@ -3,7 +3,7 @@
 
 <head>
     <?php
-    $pageTitle = "Contact Us - Sonnac Lanka Enterprises | Trusted Japanese Car Dealer";
+    $pageTitle = "Contact Us - Sonnac Lanka Enterprises | Trusted Quality Vehicle Dealer";
     include_once('./includes/head.php'); ?>
 </head>
 
@@ -288,6 +288,12 @@
                 <div class="contact-form-card brand-card" data-motion="reveal">
                     <h3>Send Us A Message</h3>
                     <form class="form-wrap" id="contactForm">
+                        <!-- Honeypot: real visitors never see or fill this (hidden off-screen);
+                             spam bots that blindly fill every field will, and get silently rejected server-side. -->
+                        <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                            <label for="gridCheck">Leave this field empty</label>
+                            <input type="text" name="gridCheck" id="gridCheck" tabindex="-1" autocomplete="off">
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">

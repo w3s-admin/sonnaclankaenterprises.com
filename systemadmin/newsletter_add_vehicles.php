@@ -3,6 +3,14 @@ require_once '../cpad/emailController.php';
 require_once '../cpad/vehicleController.php';
 CommonBase::IsAdminUser();
 
+// Newsletter tools parked for now - see newsletter_add_emails.php.
+include './inc/feature_disabled.php';
+
+// del_msg/email_msg are rendered as raw HTML below; vehicleController.php's
+// extract($_GET) would otherwise let a crafted query string set these
+// directly, so they may only carry a message this request itself built.
+$del_msg = null;
+
 $all_emais = Emails::getallvehicles(1);
 $all_seleced = Emails::getallvehicles(2);
 ?>
@@ -106,9 +114,7 @@ $all_seleced = Emails::getallvehicles(2);
 
             });</script>
 
-        <?= (isset($del_msg)) ? CommonBase::decrypt($del_msg) : "" ?>
         <?= (isset($email_msg)) ? $email_msg : "" ?>
-        <?= (isset($_GET['email_msg'])) ? CommonBase::decrypt($_GET['email_msg']) : "" ?>
     </head>
 
     <body>

@@ -143,20 +143,54 @@ class Login {
         CommonBase::SendRedirect("ownerlogin.php");
     }
 
+    /**
+     * Verifies a plaintext password against the legacy MySQL PASSWORD()-style
+     * hash this app historically stored: '*' + UPPER(SHA1(UNHEX(SHA1(password)))).
+     * Kept only so existing accounts can still log in; successful legacy
+     * verification triggers a transparent upgrade to password_hash()/bcrypt.
+     */
+    private function verifyLegacyHash($password, $storedHash) {
+        $inner = sha1($password, false);
+        $innerBin = hex2bin($inner);
+        $legacyHash = '*' . strtoupper(sha1($innerBin, false));
+        return hash_equals((string) $storedHash, $legacyHash);
+    }
+
     function AdminLogin($u, $p) {
-        $u = $this->cdb->escapeString($u);
-        $p = $this->cdb->escapeString($p);
-        $stmt = $this->dbh->prepare("SELECT Id,username,lastLogin from system_admin where username = ? and password= CONCAT('*', UPPER(SHA1(UNHEX(SHA1(?))))) AND _status = '1'");
-        $stmt->execute(array($u, $p));
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $u = trim((string) $u);
+
+        $stmt = $this->dbh->prepare("SELECT Id, username, password, lastLogin, super_admin from system_admin where username = ? AND _status = '1'");
+        $stmt->execute(array($u));
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $valid = false;
+        if ($row) {
+            $stored = (string) $row['password'];
+            if (password_get_info($stored)['algo'] !== null) {
+                // modern hash (bcrypt/argon2)
+                $valid = password_verify($p, $stored);
+            } else {
+                // legacy hash - verify, then transparently migrate to bcrypt
+                $valid = $this->verifyLegacyHash($p, $stored);
+                if ($valid) {
+                    $newHash = password_hash($p, PASSWORD_BCRYPT);
+                    $upd = $this->dbh->prepare("UPDATE system_admin SET password = ? WHERE Id = ?");
+                    $upd->execute(array($newHash, $row['Id']));
+                }
+            }
+        }
+
+        if ($valid) {
             $session_head = isset($_SESSION['app_pro']['session_head']) ? $_SESSION['app_pro']['session_head'] : "";
             $id = $row['Id'];
             $name = $row['username'];
             $lastLogin = $row['lastLogin'];
             $errmsg = "";
+            session_regenerate_id(true);
             $_SESSION[$session_head . 'Adminusername'] = $name;
             $_SESSION[$session_head . 'AdminuserId'] = $id;
             $_SESSION[$session_head . 'Adminlastlogin'] = date('l jS \of F Y h:i:s A', strtotime($lastLogin));
+            $_SESSION[$session_head . 'AdminSuperAdmin'] = (int) $row['super_admin'];
 
             $ip = $_SERVER['REMOTE_ADDR']; //Get there ip address.
             $agent = $_SERVER['HTTP_USER_AGENT']; //Get there user agent, Firefox etc, and some other info about it.
@@ -166,8 +200,8 @@ class Login {
             $logadmin->lwrite("ip : $ip ,  Browser : $agent, User Name : $name , User ID : $id");
 
             $time = CommonBase::getcurrenttime();
-            $stmt = $this->dbh->prepare("UPDATE system_admin set lastLogin='$time', `lastIp`=?  where Id = ?");
-            $stmt->execute(array($ip, $id));
+            $stmt = $this->dbh->prepare("UPDATE system_admin set lastLogin=?, `lastIp`=?  where Id = ?");
+            $stmt->execute(array($time, $ip, $id));
             CommonBase::SendRedirect("dashboard.php");
         } else {
             return CommonBase::createnotify($type = "error", $headding = "Login Failed !", $massage = "Incorrect username or password, Please Contact System Administrator", true);

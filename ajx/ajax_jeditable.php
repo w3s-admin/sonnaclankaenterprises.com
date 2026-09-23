@@ -5,10 +5,16 @@
 require '../cpad/emailController.php';
 $myCon = new ControlPadDB;
 $dbh = $myCon->dbh;
-extract($_POST);
 
+// Auth + CSRF are already enforced above by emailController.php (every POST
+// action there other than "Send_email_friend" requires an admin session and
+// a valid CSRF token) - $currentAdmin is set by that check.
+$main = isset($_POST['main']) ? $_POST['main'] : null;
+$row_id = isset($_POST['row_id']) ? $_POST['row_id'] : null;
+$type = isset($_POST['type']) ? $_POST['type'] : null;
+$value = isset($_POST['value']) ? $_POST['value'] : null;
 
-if (isset($main) && $main = "email_edit") {
+if (isset($main) && $main == "email_edit") {
     $id = CommonBase::decrypt($row_id);
     $emails = Emails::getEmailById($id);
     $arr = array();
@@ -41,7 +47,7 @@ if (isset($main) && $main = "email_edit") {
             $Q = "Update emailadress set  `name` = ? ,  updateu = ? , updatet=? WHERE `Id` = ?";
         }
         $stmt = $dbh->prepare($Q);
-        $done = $stmt->execute(array($value, CommonBase::IsAdminUser()['Id'], $time, $id));
+        $done = $stmt->execute(array($value, $currentAdmin['Id'], $time, $id));
         if ($done) {
             $arr['type'] = 'suc';
             $arr['value'] = $value;

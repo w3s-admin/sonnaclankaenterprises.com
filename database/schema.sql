@@ -141,6 +141,29 @@ CREATE TABLE `app_config` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `inquiries`
+--
+
+DROP TABLE IF EXISTS `inquiries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `inquiries` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_advert` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 0,
+  `ip` varchar(45) DEFAULT NULL,
+  `addt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`Id`),
+  KEY `fk_advert` (`fk_advert`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `availability`
 --
 

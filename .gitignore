@@ -1,1 +1,18 @@
 /node_modules/*
+
+# Login/activity logs contain IPs, usernames and user-agents; they don't
+# belong in version control. (Files already committed under logs/ before
+# this rule was added are still tracked - see the QA report for how to
+# purge them from git history if this repo is ever made public/shared.)
+# The directory tree itself is kept (via .gitkeep) because Logging::lopen()
+# in cpad/logController.php does not create missing directories - if
+# logs/login/admin/ doesn't exist on a fresh clone/deploy, every admin login
+# attempt fails outright when it tries to write the log file.
+/logs/login/admin/*
+!/logs/login/admin/.gitkeep
+
+# Runtime env config (see cpad/ControlPadDB.php) - never commit real
+# credentials here.
+.env
+.env.*
+!.env.example

@@ -28,22 +28,23 @@ class ControlPadDB
 
     public function createconnction()
     {
-        // global variables used to connect to MySQL server
-        $mysqlHost = 'localhost';
-        $mysqlPort = '3306';
-        //$dbUser = "root";
-        //$dbPwd = "nuwan123";
-        $dbName = 'sonnaclankaenterprises';
+        // Connection settings come from environment variables when present
+        // (set these in production - via Apache SetEnv/php-fpm pool config/a
+        // .env loader, never committed to the repo), falling back to the
+        // local XAMPP defaults for development.
+        //
+        // NOTE: earlier revisions of this file had real hosting credentials
+        // hardcoded here (commented out but still present). Even though they
+        // were disabled, they were never actually secret - anyone with read
+        // access to this file (or its git history) could read them. If any
+        // of those credentials are still valid on a live database, rotate
+        // them; they should be treated as compromised.
+        $mysqlHost = getenv('DB_HOST') ?: 'localhost';
+        $mysqlPort = getenv('DB_PORT') ?: '3306';
+        $dbName = getenv('DB_NAME') ?: 'sonnaclankaenterprises';
         $dbName_beta = $dbName;
-
-        $dbUser = "wthrsser_kaduweu";
-        // $dbPwd = "8l2irBt%cug8";
-        //  $dbName = 'slcarsal_w3s_kaduwela';
-        $dbUser = "root";
-        $dbPwd = "";
-        //$dbName = 'slvehic1_slautoauction';
-        // yinst set BrandedSolutionsPipeline.MYSQL_HOST=localhost
-        // yinst set BrandedSolutionsPipeline.MYSQL_PORT=4306
+        $dbUser = getenv('DB_USER') ?: 'root';
+        $dbPwd = getenv('DB_PASSWORD') ?: '';
         // check if in Beta dir
         if (isset($_SERVER)) {
             if ((isset($_SERVER['HTTP_HOST'])) && (isset($_SERVER['REQUEST_URI']))) {
@@ -73,8 +74,6 @@ class ControlPadDB
         $this->dbh = new PDO(DB_URL, DB_USER, DB_PASSWD, array(PDO::ATTR_PERSISTENT => true));
     }
 
-    //public function createconnction($host= "mysql305.ixwebhosting.com", $username ="chirast_nuwan888", $password="Nuw.911", $database="chirast_sshauto") {
-    //  public function createconnction($host= "localhost", $username ="root", $password="nuwan123", $database="chirast_sshauto") {
     //        $this->dbh = new mysqli($host, $username, $password, $database);
     //
     //        if ($this->link->connect_error != null) {

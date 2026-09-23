@@ -1,7 +1,21 @@
 <?
 require_once '../cpad/emailController.php';
 CommonBase::IsAdminUser();
+
+// Newsletter tools parked for now - see newsletter_add_emails.php.
+include './inc/feature_disabled.php';
+
 extract($_GET);
+// del_msg/email_msg are rendered as raw HTML below; they must only ever come
+// from a message this app built itself, never straight from the query
+// string (extract($_GET) would otherwise hand a crafted link full control).
+if (!empty($_SESSION['_flash_email_msg'])) {
+    $email_msg = $_SESSION['_flash_email_msg'];
+    unset($_SESSION['_flash_email_msg']);
+} else {
+    $email_msg = null;
+}
+$del_msg = null;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -81,7 +95,6 @@ extract($_GET);
 
             });</script>
 
-        <?= (isset($del_msg)) ? CommonBase::decrypt($del_msg) : "" ?>
     </head>
 
     <body>
@@ -146,7 +159,6 @@ extract($_GET);
                                 </div>
                                 <div class="content ">
                                     <?= (isset($email_msg)) ? $email_msg : "" ?>
-                                    <?= (isset($_GET['email_msg'])) ? CommonBase::decrypt($_GET['email_msg']) : "" ?>
                                     <div class="row-fluid">
                                         <div class="span12">
                                             <?= Emails::getAvailableEmails() ?>

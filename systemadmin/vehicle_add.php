@@ -5,6 +5,12 @@ $fk_mileage = 1;
 $price_type = 1;
 CommonBase::IsAdminUser();
 
+$shop_save_msg = null;
+if (!empty($_SESSION['_flash_shop_save_msg'])) {
+    $shop_save_msg = $_SESSION['_flash_shop_save_msg'];
+    unset($_SESSION['_flash_shop_save_msg']);
+}
+
 $pro_save_msg = $pro_save_msg ?? null;
 $last_id = $last_id ?? null;
 $vtype = $vtype ?? null;
@@ -228,7 +234,8 @@ $Options = $Options ?? null;
                                 <div class="content">
                                     <div>
                                         <?= ($pro_save_msg != NULL) ? "$pro_save_msg" : "" ?>
-                                        <?= (isset($_GET['shop_save_msg'])) ? CommonBase::decrypt($_GET['shop_save_msg']) : "" ?>
+                                        <?= ($shop_save_msg != NULL) ? "$shop_save_msg" : "" ?>
+                                        <?= (isset($_GET['shop_save_msg'])) ? htmlspecialchars(CommonBase::decrypt($_GET['shop_save_msg']), ENT_QUOTES, 'UTF-8') : "" ?>
                                     </div>
                                     <?
                                     if (!is_numeric($last_id)) {
@@ -414,12 +421,11 @@ $Options = $Options ?? null;
                                                     <div class="row-fluid">
                                                         <label class="form-label span3 red" for="phone">Price</label>
                                                         <div class="left marginR10 grid-inputs span9">
-                                                            <div class="span3"  >
-                                                                <div class="controls span11"> 
-                                        <?= Vehicle::createSelect($price_type, "price_type", 0, "validate[required] nostyle", "Please select Price Type", "select Id , name from price_type WHERE status = 1 ORDER by Id asc", true ) ?></div>
+                                                            <div class="span1" style="padding-top:8px;">
+                                                                <strong>Rs</strong>
                                                             </div>
-                                                            <div class="span4" >
-                                                                <input  type="text" name="Price" id="Price" class="validate[required] span11"  title="Please Add Price" value="<?= $Price ?>"/>     
+                                                            <div class="span6" >
+                                                                <input  type="text" name="Price" id="Price" class="validate[required] span11"  title="Please Add Price" value="<?= $Price ?>"/>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -649,19 +655,10 @@ $Options = $Options ?? null;
                                                 setTimeout("$('.fileIn').uniform();", 200);
                                             })
                                         </script>
-                                        <div class="form-row row-fluid">
-                                            <div class="span12">
-                                                <div class="row-fluid">
-                                                    <div class="form-actions">
-                                                        <div class="span3"></div>
-                                                        <div class="span9 controls">
-                                                            <input type="hidden" name="adId" value="<?= CommonBase::encrypt($last_id) ?>"/>
-                                                            <button type="submit" class="btn marginR10" name="v_save_image">Save Images</button>
-                                                            <button class="btn btn-danger" type="reset">Cancel</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div> 
+                                        <div class="form-actions" style="margin-top:15px;">
+                                            <input type="hidden" name="adId" value="<?= CommonBase::encrypt($last_id) ?>"/>
+                                            <button type="submit" class="btn marginR10" name="v_save_image">Save Images</button>
+                                            <button class="btn btn-danger" type="reset">Cancel</button>
                                         </div>
                                     </form>
                                 <? } ?>

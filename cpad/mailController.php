@@ -105,7 +105,13 @@ function sendmails_newsletter($emails, $subject) {
     // var_dump("is ".getAvailableEmails());
     $txtFROMEmailName = "Kaduwela Enterprises";
 
-    $txtSUBJECT = $subject;
+    // The bundled PHPMailer (cpad/common/class.phpmailer.php) is a very old
+    // fork whose header-encoding routine fails to treat bare CR/LF as unsafe
+    // characters, so a Subject containing a literal newline can inject extra
+    // SMTP headers (e.g. a forged Bcc:) straight into the outgoing message.
+    // $subject here ultimately comes from an admin-submitted form field, so
+    // strip CR/LF at the source rather than relying on the library.
+    $txtSUBJECT = str_replace(array("\r", "\n"), '', (string) $subject);
 
     $cdb = new ControlPadDB();
     $dbh = $cdb->dbh;

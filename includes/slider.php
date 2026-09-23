@@ -215,9 +215,9 @@ if (!empty($latest_vehicles)) {
     <div class="container">
         <div class="hero-modern-grid">
             <div class="hero-modern-copy">
-                <span class="brand-eyebrow" data-motion="hero">Japanese Vehicle Exporter</span>
-                <h1 data-motion="split-reveal" data-motion-onload><span class="split-word">Own</span> <span class="split-word">The</span> <span class="split-word">Road</span> <span class="split-word">With</span> <span class="split-word">A</span> <span class="split-word" style="color:var(--brand-red)">Genuine</span> <span class="split-word" style="color:var(--brand-red)">Japanese</span> <span class="split-word">Import</span></h1>
-                <p data-motion="hero">Sonnac Lanka Enterprises sources fully-inspected, quality used vehicles direct from Japan and ships them worldwide — no middlemen, no guesswork.</p>
+                <span class="brand-eyebrow" data-motion="hero">Quality Vehicle Exporter</span>
+                <h1 data-motion="split-reveal" data-motion-onload><span class="split-word">Own</span> <span class="split-word">The</span> <span class="split-word">Road</span> <span class="split-word">With</span> <span class="split-word">A</span> <span class="split-word" style="color:var(--brand-red)">Genuine</span> <span class="split-word" style="color:var(--brand-red)">Quality</span> <span class="split-word">Import</span></h1>
+                <p data-motion="hero">Sonnac Lanka Enterprises sources fully-inspected, quality used vehicles direct from the source and ships them worldwide — no middlemen, no guesswork.</p>
                 <div class="hero-modern-btns" data-motion="hero">
                     <a href="used_japanese_vehicles.php" class="btn-brand btn-brand-primary">Browse Vehicles</a>
                     <a href="contact.php" class="btn-brand btn-brand-outline">Talk To Us</a>
@@ -239,7 +239,7 @@ if (!empty($latest_vehicles)) {
             </div>
             <div class="hero-modern-visual" data-motion="hero">
                 <div class="car-glow" data-motion="parallax" data-parallax-speed="0.35"></div>
-                <span class="ring-badge">Direct From Japan</span>
+                <span class="ring-badge">Direct From The Source</span>
                 <img class="car-shot" src="assets/img/hero/hero-img-1.webp" alt="Featured vehicle">
                 <?php if ($featured): ?>
                 <a class="featured-card" href="<?php echo $featured['link'] ?>">

@@ -3,6 +3,14 @@ error_reporting(0);
 ini_set('display_errors', 0);
 $errorMSG = "";
 
+// Honeypot: a hidden field no real visitor can see or fill. If it arrives
+// non-empty, a bot filled in every input it found - silently drop the
+// submission without telling the bot anything useful.
+if (!empty($_POST["gridCheck"])) {
+    echo "success";
+    exit;
+}
+
 // NAME
 if (empty($_POST["name"])) {
     $errorMSG = "Name is required ";
@@ -13,6 +21,8 @@ if (empty($_POST["name"])) {
 // EMAIL
 if (empty($_POST["email"])) {
     $errorMSG .= "Email is required ";
+} elseif (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+    $errorMSG .= "Please enter a valid email address ";
 } else {
     $email = $_POST["email"];
 }

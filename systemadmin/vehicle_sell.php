@@ -1,6 +1,6 @@
 <?
 require_once '../cpad/vehicleController.php';
-
+CommonBase::IsAdminUser();
 
 if (isset($_GET['vid'])) {
     $id = CommonBase::decrypt($_GET['vid']);
@@ -144,7 +144,7 @@ $sellp = $sellp ?? null;
                                             <div class="row-fluid">
                                                 <label class="form-label span3  red"  for="name">Selling Price</label>
                                                 <div class="span5 controls sel" >
-                                                    <input type="text" value="<?= ${'sellp'} ?>" name="sellp" class="span12 validate[required,custom[number]]" />
+                                                    <input type="text" value="<?= htmlspecialchars(${'sellp'} ?? '', ENT_QUOTES, 'UTF-8') ?>" name="sellp" class="span12 validate[required,custom[number]]" />
                                                 </div>   
                                             </div>
                                         </div>
@@ -254,7 +254,7 @@ $sellp = $sellp ?? null;
 
                                                 </div>
                                                 <div class="span4">
-                                                    <input type="text" name="Modeltxt" id="Modeltxt" class="validate[required]" title="Please Add Model" value="<?= $Modeltxt ?>" />
+                                                    <input type="text" name="Modeltxt" id="Modeltxt" class="validate[required]" title="Please Add Model" value="<?= htmlspecialchars($Modeltxt ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                                                 </div>
 
 
@@ -277,7 +277,7 @@ $sellp = $sellp ?? null;
                                         <div class="row-fluid">
                                             <label class="form-label span3 red" for="phone">Chasi Number</label>
                                             <div class="span5 controls sel" >
-                                                <input type="text" name="Chasi" id="Chasi" class="validate[required]"  title="Please Select Chasi" value="<?= $Chasi ?>"/>
+                                                <input type="text" name="Chasi" id="Chasi" class="validate[required]"  title="Please Select Chasi" value="<?= htmlspecialchars($Chasi ?? '', ENT_QUOTES, 'UTF-8') ?>"/>
                                             </div>
                                         </div>
                                     </div>
@@ -330,7 +330,7 @@ $sellp = $sellp ?? null;
                                         <div class="row-fluid">
                                             <label class="form-label span3 red" for="phone">Year &amp; Month (2010 - 11)</label>
                                             <div class="left marginR10">
-                                                <input type="text" name="ym" id="ym" class="validate[required]"  title="Please Select Year &amp; Month " value="<?= $ym ?>" />
+                                                <input type="text" name="ym" id="ym" class="validate[required]"  title="Please Select Year &amp; Month " value="<?= htmlspecialchars($ym ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                                             </div>
                                         </div>
                                     </div>
@@ -342,7 +342,7 @@ $sellp = $sellp ?? null;
                                             <label class="form-label span3 red" for="phone">Mileage</label>
                                             <div class="left marginR10">
                                                 <div class="input-prepend">
-                                                    <input type="text" name="km" id="km" class="validate[required]"  title="Please Select Mileage"  value="<?= $km ?>"/>
+                                                    <input type="text" name="km" id="km" class="validate[required]"  title="Please Select Mileage"  value="<?= htmlspecialchars($km ?? '', ENT_QUOTES, 'UTF-8') ?>"/>
                                                     <span class="add-on">KM</span>
 
                                                 </div>
@@ -366,7 +366,7 @@ $sellp = $sellp ?? null;
                                         <div class="row-fluid">
                                             <label class="form-label span3 " for="phone">Registration #</label>
                                             <div class="left marginR10 span5">
-                                                <input type="text" name="reg_num" id="reg_num"   value="<?= $reg_num ?>"  />
+                                                <input type="text" name="reg_num" id="reg_num"   value="<?= htmlspecialchars($reg_num ?? '', ENT_QUOTES, 'UTF-8') ?>"  />
                                             </div>
                                         </div>
                                     </div>
@@ -387,11 +387,11 @@ $sellp = $sellp ?? null;
                                         <div class="row-fluid">
                                             <label class="form-label span3 red" for="phone">Price</label>
                                             <div class="left marginR10 grid-inputs span9">
-                                                <div class="span3"  >
-                                                    <div class="controls span11"> <?= Vehicle::createSelect($price_type, "price_type", 0, "validate[required] nostyle", "Please select Price Type", "select Id , name from price_type WHERE status = 1 ORDER by Id asc") ?></div>
+                                                <div class="span1" style="padding-top:8px;">
+                                                    <strong>Rs</strong>
                                                 </div>
-                                                <div class="span4" >
-                                                    <input  type="text" name="Price" id="Price" class="validate[required] span11"  title="Please Add Price" value="<?= $Price ?>"/>     
+                                                <div class="span6" >
+                                                    <input  type="text" name="Price" id="Price" class="validate[required] span11"  title="Please Add Price" value="<?= htmlspecialchars($Price ?? '', ENT_QUOTES, 'UTF-8') ?>"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -427,7 +427,7 @@ $sellp = $sellp ?? null;
                                                     <input type="checkbox" name="so" value="1" id="so"  class="nostyle ibutton " <?= CommonBase::checked(${'so'}) ?>  />     
                                                 </div>
                                                 <div class="span4" >
-                                                    <input type="text" name="so_price" class="validate[condRequired[so]]" id="so_price" value="<?= $so_price ?>" />
+                                                    <input type="text" name="so_price" class="validate[condRequired[so]]" id="so_price" value="<?= htmlspecialchars($so_price ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                                                 </div>
 
                                             </div>
@@ -549,7 +549,7 @@ $sellp = $sellp ?? null;
                                         <div class="row-fluid">
                                             <label class="form-label span3 " for="phone">Other OPtions</label>
                                             <div class="left marginR10 span8">
-                                                <textarea name="Options" id="Options" cols="" rows="5" class="span12 uniform"><?= $Options ?></textarea>
+                                                <textarea name="Options" id="Options" cols="" rows="5" class="span12 uniform"><?= htmlspecialchars($Options ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -659,7 +659,7 @@ $sellp = $sellp ?? null;
                                             <div class="form-actions">
                                                 <div class="span3"></div>
                                                 <div class="span9 controls">
-                                                    <input type="hidden" name="adId" value="<?= $_GET['vid'] ?>"/>
+                                                    <input type="hidden" name="adId" value="<?= htmlspecialchars($_GET['vid'] ?? '', ENT_QUOTES, 'UTF-8') ?>"/>
                                                     <input type="hidden" name="editbtn" value=""/>
                                                     <button type="submit" class="btn marginR10" name="v_save_image">Save Images</button>
                                                     <button class="btn btn-danger" type="reset">Cancel</button>
@@ -675,5 +675,6 @@ $sellp = $sellp ?? null;
 
             </div>
         </div>
+        <? include_once './inc/comman_js.php'; ?>
     </body>
 </html>

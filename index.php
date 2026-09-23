@@ -6,7 +6,7 @@ require 'cpad/vehicleController.php';
 
 <head>
     <?php
-    $pageTitle = "Sonnac Lanka Enterprises - Your Trusted Japanese Car Dealer in Japan";
+    $pageTitle = "Sonnac Lanka Enterprises - Your Trusted Quality Vehicle Dealer";
     include_once('./includes/head.php'); ?>
 </head>
 

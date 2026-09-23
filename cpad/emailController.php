@@ -9,7 +9,44 @@ $securimage = new Securimage();
 $dbh = $myCon->dbh;
 $dbh_sonec = $myCon->dbh;
 $time = CommonBase::getcurrenttime();
-extract($_POST);
+
+// "Send_email_friend" is the only public-facing action here (a site visitor
+// emailing a vehicle listing to a friend, gated by its own captcha check
+// below) - every other action in this file (newsletter sending, subscriber
+// list management, admin add/edit/delete of stored emails) is admin-only.
+$currentAdmin = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['Send_email_friend'])) {
+    $currentAdmin = CommonBase::IsAdminUser();
+    CommonBase::requireValidCsrf();
+}
+
+// See the matching guard in vehicleController.php: these are rendered as
+// raw HTML by the admin pages that include this controller, so a crafted
+// request must never be able to set them directly via extract().
+$shop_save_msg = null;
+$email_msg = null;
+$errmsg = null;
+
+extract($_POST, EXTR_SKIP);
+
+// Same reasoning as the guard in vehicleController.php: several of these
+// (checkbox groups, fields only present for some actions) are legitimately
+// absent from $_POST depending on which button was pressed, which PHP 8
+// reports as an "Undefined variable" warning on every submit unless
+// defaulted explicitly.
+$answer ??= null;
+$femail ??= null;
+$name ??= null;
+$vid ??= null;
+$che_all ??= null;
+$che_selcted ??= null;
+$subject ??= null;
+$uvid ??= null;
+$vtid ??= null;
+$email ??= null;
+$search ??= null;
+$searchtext ??= null;
+$row_id ??= null;
 
 if (isset($_POST['Send_email_friend'])) {
     if ($securimage->check(${'answer'}) == false) {
@@ -29,10 +66,8 @@ if (isset($_POST['Send_email_friend'])) {
 
         if (sendmails_to_friend($_POST)) {
             Emails::add_to_email(${'femail'});
-            $shop_save_msg = CommonBase::createMassageDiv(
-                            $type = 'suc', $headding = 'Eamil Sent', $massage = 'Thank you, your Email has been sent to ' . ${'femail'}, 0);
-            CommonBase::gotopage(CommonBase::appendGettoURL("shop_save_msg=".  CommonBase::encrypt($shop_save_msg)));
-             
+            echo CommonBase::jsAlert('Thank you, your Email has been sent to ' . addslashes(${'femail'}));
+            echo CommonBase::closeWindow();
         }
     }
 }
@@ -174,10 +209,11 @@ if (isset($_POST['del_mail'])) {
     $id = CommonBase::decrypt($row_id);
     if (is_numeric($id)) {
         $stmt = $dbh->prepare("UPDATE emailadress SET status = 0, delu=?, delt=? WHERE Id = ?");
-        $done = $stmt->execute(array(CommonBase::IsAdminUser()['Id'], CommonBase::getcurrenttime(), $id));
+        $done = $stmt->execute(array($currentAdmin['Id'], CommonBase::getcurrenttime(), $id));
         if ($done) {
             $shop_del_msg = CommonBase:: createnotify($type = 'error', $headding = 'Deleted Successfully !', $massage = '', $hide = 'true', 300);
-            CommonBase::SendRedirect(CommonBase::appendGettoURL("del_msg=" . CommonBase::encrypt($shop_del_msg)));
+            $_SESSION['_flash_del_msg'] = $shop_del_msg;
+            CommonBase::SendRedirect("newsletter_email_manager.php");
         }
     }
 }
@@ -200,8 +236,7 @@ if (isset($_POST['editemails'])) {
     } else {
         $time = CommonBase::getcurrenttime();
         $stmt = $dbh->prepare("Update emailadress set  `name` = ? , email = ?  , updateu = ? , updatet=? WHERE `Id` = ?");
-        $done = $stmt->execute(array($name, $email, $uId, $time, $uvid));
-        var_dump($done);
+        $done = $stmt->execute(array($name, $email, $currentAdmin['Id'], $time, $uvid));
         if ($done) {
             $addedIdTemp = CommonBase::encrypt($dbh->lastInsertId());
             $addedId = $addedIdTemp;
@@ -251,13 +286,14 @@ if (isset($_POST['addemails'])) {
 
         $time = CommonBase::getcurrenttime();
         $stmt = $dbh->prepare("INSERT INTO emailadress(`name`, email, status, addu, addt) VALUES(?,?,1,?,?)");
-        $done = $stmt->execute(array($name, $email, $uId, $time));
+        $done = $stmt->execute(array($name, $email, $currentAdmin['Id'], $time));
 
         if ($done) {
             $email_msg =
                     CommonBase::createMassageDiv(
                             $type = 'suc', $headding = "Email Addded", $massage = '', 100);
-            CommonBase::SendRedirect(CommonBase::appendGettoURL("email_msg=" . CommonBase::encrypt($email_msg)));
+            $_SESSION['_flash_email_msg'] = $email_msg;
+            CommonBase::SendRedirect("newsletter_email_manager.php");
         }
     }
 }

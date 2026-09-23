@@ -173,45 +173,111 @@ class CommonBase {
         return htmlspecialchars(preg_replace("@<script[^>]*>.+</script[^>]*>@i", "", trim($value)));
     }
 
-    public static function IsAdminUser() {
+    /**
+     * Verifies an authenticated admin session.
+     * Unlike the legacy implementation, this NEVER falls through to caller code
+     * when the session check fails: it halts the request immediately, so it is
+     * safe to call from any entry point (page or controller) as a hard gate,
+     * including from non-browser clients that don't follow redirects.
+     *
+     * @param string|null $requiredPrivilege optional privilege key to also require
+     *                                        (checked against $_SESSION[...]['privileges'])
+     * @return array admin session info (only returns on success)
+     */
+    public static function IsAdminUser($requiredPrivilege = null) {
 
         $path_parts = pathinfo($_SERVER['PHP_SELF']);
         $baseName = $path_parts["basename"];
         $session_head = isset($_SESSION['app_pro']['session_head']) ? $_SESSION['app_pro']['session_head'] : "";
-        if ($baseName != "index.php") {
-            $sessiochk = (isset($_SESSION[$session_head . 'Adminusername']) && $_SESSION[$session_head . 'Adminusername'] != NULL) || (isset($_SESSION[$session_head . 'AdminuserId']) && $_SESSION[$session_head . 'AdminuserId'] != NULL);
-            if (!$sessiochk) {
-                CommonBase::SendRedirect("index.php");
-            }
-            $a['name'] = $_SESSION[$session_head . 'Adminusername'];
-            $a['Id'] = $_SESSION[$session_head . 'AdminuserId'];
-            $a['lastlogin'] = $_SESSION[$session_head . 'Adminlastlogin'];
-            $a['TYPE'] = "ADMIN";
-            return $a;
+
+        if ($baseName == "index.php") {
+            // login page itself: nothing to enforce, no session data to return
+            return null;
         }
+
+        $sessiochk = (isset($_SESSION[$session_head . 'Adminusername']) && $_SESSION[$session_head . 'Adminusername'] != NULL) || (isset($_SESSION[$session_head . 'AdminuserId']) && $_SESSION[$session_head . 'AdminuserId'] != NULL);
+
+        if (!$sessiochk) {
+            CommonBase::SendRedirect("index.php");
+            exit;
+        }
+
+        $a['name'] = $_SESSION[$session_head . 'Adminusername'];
+        $a['Id'] = $_SESSION[$session_head . 'AdminuserId'];
+        $a['lastlogin'] = $_SESSION[$session_head . 'Adminlastlogin'];
+        $a['TYPE'] = "ADMIN";
+        $a['super_admin'] = isset($_SESSION[$session_head . 'AdminSuperAdmin']) ? $_SESSION[$session_head . 'AdminSuperAdmin'] : 0;
+
+        if ($requiredPrivilege === 'super_admin' && empty($a['super_admin'])) {
+            http_response_code(403);
+            echo CommonBase::createMassageDiv('err', 'Access Denied', 'Only a super admin can perform this action.');
+            exit;
+        }
+
+        return $a;
     }
 
     public static function IsSaleOwner() {
         $path_parts = pathinfo($_SERVER['PHP_SELF']);
         $baseName = $path_parts["basename"];
-        if ($baseName != "ownerlogin.php") {
-            $sessiochk = (isset($_SESSION['slacarsale_Ownwerusername']) && $_SESSION['slacarsale_Ownwerusername'] != NULL) || (isset($_SESSION['slacarsale_OwnweruserId']) && $_SESSION['slacarsale_OwnweruserId'] != NULL);
-            if (!$sessiochk) {
-                CommonBase::SendRedirect("ownerlogin.php");
-            }
-            $a['name'] = $_SESSION['slacarsale_Ownwerusername'];
-            $a['id'] = $_SESSION['slacarsale_OwnweruserId'];
-            $a['lastlogin'] = $_SESSION['slacarsale_Ownwerlastlogin'];
-            $a['TYPE'] = $_SESSION['slacarsale_OwnwerType'];
-            $a['USER_ID'] = $_SESSION['slacarsale_userId'];
-            $a['PAYMENT'] = $_SESSION['slacarsale_paymetDetails'];
-            $a['AVAILABLE_DATES'] = $_SESSION['slacarsale_OwnerAvilableDates'];
-            return $a;
+
+        if ($baseName == "ownerlogin.php") {
+            return null;
         }
+
+        $sessiochk = (isset($_SESSION['slacarsale_Ownwerusername']) && $_SESSION['slacarsale_Ownwerusername'] != NULL) || (isset($_SESSION['slacarsale_OwnweruserId']) && $_SESSION['slacarsale_OwnweruserId'] != NULL);
+        if (!$sessiochk) {
+            CommonBase::SendRedirect("ownerlogin.php");
+            exit;
+        }
+        $a['name'] = $_SESSION['slacarsale_Ownwerusername'];
+        $a['id'] = $_SESSION['slacarsale_OwnweruserId'];
+        $a['lastlogin'] = $_SESSION['slacarsale_Ownwerlastlogin'];
+        $a['TYPE'] = $_SESSION['slacarsale_OwnwerType'];
+        $a['USER_ID'] = $_SESSION['slacarsale_userId'];
+        $a['PAYMENT'] = $_SESSION['slacarsale_paymetDetails'];
+        $a['AVAILABLE_DATES'] = $_SESSION['slacarsale_OwnerAvilableDates'];
+        return $a;
     }
 
     public static function SendRedirect($page) {
         header("Location:" . $page);
+        exit;
+    }
+
+    /**
+     * Generates (or reuses) a per-session CSRF token.
+     */
+    public static function csrfToken() {
+        if (empty($_SESSION['_csrf_token'])) {
+            $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['_csrf_token'];
+    }
+
+    /**
+     * Renders a hidden CSRF input field for insertion into state-changing forms.
+     */
+    public static function csrfField() {
+        $token = htmlspecialchars(self::csrfToken(), ENT_QUOTES, 'UTF-8');
+        return '<input type="hidden" name="_csrf" value="' . $token . '">';
+    }
+
+    /**
+     * Validates the CSRF token on the current POST request. Halts the request
+     * with a 403 on mismatch/absence. Call after auth checks, before any write.
+     */
+    public static function requireValidCsrf() {
+        $submitted = isset($_POST['_csrf']) ? $_POST['_csrf'] : '';
+        if ($submitted === '' && isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+            $submitted = $_SERVER['HTTP_X_CSRF_TOKEN'];
+        }
+        $expected = isset($_SESSION['_csrf_token']) ? $_SESSION['_csrf_token'] : '';
+        if ($expected === '' || $submitted === '' || !hash_equals($expected, $submitted)) {
+            http_response_code(403);
+            echo CommonBase::createMassageDiv('err', 'Security Check Failed', 'Your session expired or the request could not be verified. Please refresh the page and try again.');
+            exit;
+        }
     }
 
     public static function full_SiteUrl() {
@@ -386,6 +452,7 @@ class CommonBase {
     }
 
     public static function encrypt($sData, $sKey = 'encodecarsale') {
+        $sData = (string) $sData;
         $sResult = '';
         for ($i = 0; $i < strlen($sData); $i++) {
             $sChar = substr($sData, $i, 1);
@@ -399,7 +466,7 @@ class CommonBase {
 
     public static function decrypt($sData, $sKey = 'encodecarsale') {
         $sResult = '';
-        $sData = self::decode_base64($sData);
+        $sData = self::decode_base64((string) $sData);
         for ($i = 0; $i < strlen($sData); $i++) {
             $sChar = substr($sData, $i, 1);
             $sKeyChar = substr($sKey, ($i % strlen($sKey)) - 1, 1);

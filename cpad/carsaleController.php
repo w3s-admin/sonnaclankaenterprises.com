@@ -1,5 +1,16 @@
 <?php
 
+// Dead code: this handles the multi-tenant "reseller/carsale" registration
+// and billing flow from the shared ControlPad framework template. No page on
+// this site (ownerlogin.php, owner_home.php, admin_search_carsale.php, etc.)
+// exists to drive it, and nothing require()s this file - grep confirms zero
+// references. It's left in place only for reference; direct HTTP requests to
+// it are refused outright rather than leaving an unauthenticated attack
+// surface (self-registration, payment record writes) for a feature that
+// isn't actually part of this site.
+http_response_code(404);
+exit;
+
 require 'clsCommonBase.php';
 require 'clsCarsale.php';
 require_once 'capcha/securimage.php';

@@ -39,6 +39,13 @@ $__navGroups = array(
         ),
     ),
     array(
+        'title' => 'Inquiries',
+        'icon'  => 'icomoon-icon-mail',
+        'items' => array(
+            array('inquiry_manager.php', 'icomoon-icon-list-view', 'Inquiry Manager'),
+        ),
+    ),
+    array(
         'title' => 'Staff',
         'icon'  => 'icomoon-icon-people',
         'items' => array(

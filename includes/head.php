@@ -16,7 +16,7 @@
  <link rel="stylesheet" href="assets/css/responsive.css">
  <link rel="stylesheet" href="assets/css/dark-theme.css">
  <link rel="stylesheet" href="assets/css/brand.css">
- <title><?php echo $pageTitle? $pageTitle: "Sonnac Lanka Enterprises - Trusted Japanese Car Dealer"  ?></title>
+ <title><?php echo $pageTitle? $pageTitle: "Sonnac Lanka Enterprises - Trusted Quality Vehicle Dealer"  ?></title>
  <link rel="icon" type="image/png" href="assets/img/favicon.png">
 
  <!-- Fontawesome -->

@@ -25,7 +25,7 @@ class Emails {
             $done = $stmt->execute(array($email));
             return $done;
         }
-        return $done;
+        return false;
     }
 
     public static function cheksendcount() {
@@ -378,7 +378,7 @@ class Emails {
         $cdb = new ControlPadDB();
         $dbh = $cdb->dbh;
         $stmt = $dbh->prepare("SELECT yenrate FROM yenrate where `Id` = 1");
-        $stmt->execute(array($Id));
+        $stmt->execute();
         if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             return $row['yenrate'];
         } else {

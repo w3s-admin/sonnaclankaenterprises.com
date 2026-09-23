@@ -13,7 +13,7 @@ $style = $style ?? "";
 
 <head>
     <?php
-    $pageTitle = "Used Japanese Vehicles - Sonnac Lanka Enterprises";
+    $pageTitle = "Used Vehicles - Sonnac Lanka Enterprises";
     include_once('./includes/head.php'); ?>
 
 </head>
@@ -320,7 +320,7 @@ $style = $style ?? "";
                                       SELECT 1
                                       FROM advert a
                                       WHERE a.fk_make = m.Id
-                                      AND a.status = 1
+                                      AND a.status = 1 AND a.flow = 1
                                     )
                                     ORDER BY m.Id ASC",
                                     $columName,
@@ -331,25 +331,32 @@ $style = $style ?? "";
                             </div>
                             <div class="form-group">
                                 <label for="Model"><i class="ri-price-tag-3-line"></i> Model</label>
-                                <select id="Model" name="Model" class="" title="Please Select Model ">
-                                    <?php echo
-                                    CommonBase::createSelectAjxSearch(
+                                <!-- Shows every model currently in stock upfront (same as Make/Body
+                                     Type/Transmission below), scoped down further by the #Make change
+                                     handler once a specific Make is picked - previously this stayed on
+                                     just "Any Model" with nothing else until Make was chosen first,
+                                     which looked broken/empty next to the other filters. -->
+                                <?php echo
+                                    CommonBase::createSelectSearch(
                                         ${'Model'},
-                                        ${'Make'},
-                                        "SELECT m.Id, m.name
-                                     FROM model m
-                                     WHERE m.fk_make = ?
-                                     AND m.status = 1
-                                     AND EXISTS (
-                                       SELECT 1
-                                       FROM advert a
-                                       WHERE a.fk_model = m.Id
-                                         AND a.status = 1
-                                     )",
-                                        "fk_model",
-                                        "Any Model"
+                                        $name = 'Model',
+                                        null,
+                                        $class = "",
+                                        "",
+                                        $q = "SELECT mo.Id, mo.name
+                                    FROM model mo
+                                    WHERE mo.status = 1
+                                    AND EXISTS (
+                                      SELECT 1
+                                      FROM advert a
+                                      WHERE a.fk_model = mo.Id
+                                      AND a.status = 1 AND a.flow = 1
+                                    )
+                                    ORDER BY mo.Id ASC",
+                                        $columName,
+                                        "Any Model",
+                                        $style
                                     ); ?>
-                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="BodyType"><i class="ri-car-washing-line"></i> Body Type</label>
@@ -367,7 +374,7 @@ $style = $style ?? "";
                                       SELECT 1
                                       FROM advert a
                                       WHERE a.fk_body_type = bt.Id
-                                        AND a.status = 1
+                                        AND a.status = 1 AND a.flow = 1
                                     )
                                     ORDER BY bt.Id ASC;",
                                     $columName,
@@ -392,7 +399,7 @@ $style = $style ?? "";
                                       SELECT 1
                                       FROM advert a
                                       WHERE a.fk_transmission = t.Id
-                                      AND a.status = 1
+                                      AND a.status = 1 AND a.flow = 1
                                     )
                                     ORDER BY t.Id ASC;",
                                     $columName,
@@ -408,7 +415,7 @@ $style = $style ?? "";
 
                 <div class="col-xxl-9 col-xl-8 col-lg-8 order-xl-2 order-lg-1 order-md-1 order-1">
                     <?
-                    $returnArray = Vehicle::getAll_vehicle_search($_GET, true, true);
+                    $returnArray = Vehicle::getAll_vehicle_search($_GET, true, false);
                     $svcount = Vehicle::getResultCountBySearch($returnArray['q_count'], $returnArray['v']);
 
                     if ($svcount > 0) {

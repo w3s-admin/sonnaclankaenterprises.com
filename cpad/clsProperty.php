@@ -28,7 +28,7 @@ class Property {
         }
         if ($c < $count) {
             $stmt = $dbh->prepare("select * from advert WHERE `_status` = 1 ");
-            $stmt->execute(array($main, $loation, $main_type));
+            $stmt->execute();
             $arr = array();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 array_push($arr, $row);

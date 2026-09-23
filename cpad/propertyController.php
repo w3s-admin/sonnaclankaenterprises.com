@@ -9,8 +9,20 @@ require_once 'common/HTTP_Upload.php';
 $myCon = new ControlPadDB;
 
 $dbh = $myCon->dbh;
-extract($_POST);
-extract($_GET);
+
+// Admin-only (property add/edit/delete/image management), and this file is
+// directly web requestable - see the matching guard in vehicleController.php.
+$shop_save_msg = null;
+$pro_save_msg = null;
+$del_msg = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    CommonBase::IsAdminUser();
+    CommonBase::requireValidCsrf();
+}
+
+extract($_POST, EXTR_SKIP);
+extract($_GET, EXTR_SKIP);
 
 if (isset($_POST['pro_save_btn'])) {
 
@@ -79,10 +91,10 @@ if (isset($_POST['pro_save_btn'])) {
             CommonBase::IsAdminUser()['Id'],
             CommonBase::getcurrenttime(),
             $keywd,
-            preg_replace('#<script(.*?)>(.*?)</script>#is', '', $info),
+            strip_tags($info),
             $ho
         ));
-       
+
         if ($done) {
 
             $addedIdTemp = CommonBase::encrypt($dbh->lastInsertId());
@@ -162,7 +174,7 @@ if (isset($_POST['pro_edit_btn'])) {
             CommonBase::IsAdminUser()['Id'],
             CommonBase::getcurrenttime(),
             $keywd,
-            preg_replace('#<script(.*?)>(.*?)</script>#is', '', $info),
+            strip_tags($info),
             $ho,
             $edit_id
         ));
@@ -194,7 +206,8 @@ if (isset($_POST['del_pro'])) {
         $shop_del_msg = CommonBase:: createnotify($type = 'error', $headding = 'Deleted Successfully !', $massage = '', $hide = 'true');
 
         if ($done) {
-            CommonBase::SendRedirect(CommonBase::appendGettoURL("del_msg=" . CommonBase::encrypt($shop_del_msg)));
+            $_SESSION['_flash_del_msg'] = $shop_del_msg;
+            CommonBase::SendRedirect("vehicle_manager.php");
         }
     }
 }
@@ -226,7 +239,7 @@ if (isset($_POST['updateImage'])) {
         $allfiles = array();
         $fcount = FALSE;
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif", "JPG", "JPEG");
+            $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -242,7 +255,7 @@ if (isset($_POST['updateImage'])) {
                 $dest_name = $currentFile->moveTo($dest_dir);
                 if (PEAR::isError($dest_name)) {
                     //  $this->setError($dest_name->getMessage());
-                    var_dump($dest_name->getMessage());
+                    error_log('File upload error: ' . $dest_name->getMessage());
                 } else {
                     $realname = $currentFile->getProp('real');
                     $imgfullPath = $dest_dir . $dest_name;
@@ -307,7 +320,7 @@ if (isset($_POST['pro_save_image'])) {
         $allfiles = array();
         $fcount = FALSE;
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif", "JPG", "JPEG");
+            $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -323,7 +336,7 @@ if (isset($_POST['pro_save_image'])) {
                 $dest_name = $currentFile->moveTo($dest_dir);
                 if (PEAR::isError($dest_name)) {
                     //  $this->setError($dest_name->getMessage());
-                    var_dump($dest_name->getMessage());
+                    error_log('File upload error: ' . $dest_name->getMessage());
                 } else {
                     $realname = $currentFile->getProp('real');
                     $imgfullPath = $dest_dir . $dest_name;

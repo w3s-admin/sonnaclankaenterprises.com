@@ -6,7 +6,21 @@ require_once 'common/HTTP_Upload.php';
 
 $myCon = new ControlPadDB;
 $dbh = $myCon->dbh;
-extract($_POST);
+
+// Reviews are only ever created/edited/deleted from the admin panel (see
+// docs/04-managing-reviews.md) - there is no public review-submission form.
+// This file is also require()d from about.php/includes/testimonial.php just
+// to read the approved review list for public display, so the gate below is
+// scoped to POST only; a normal GET page view is unaffected.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    CommonBase::IsAdminUser();
+    CommonBase::requireValidCsrf();
+}
+
+$name = isset($_POST['name']) ? $_POST['name'] : null;
+$title = isset($_POST['title']) ? $_POST['title'] : null;
+$country = isset($_POST['country']) ? $_POST['country'] : null;
+$comment = isset($_POST['comment']) ? $_POST['comment'] : null;
 
 if (isset($_POST['upload_review_image'])) {
     $reviewID = CommonBase::decrypt($_GET['rid']);
@@ -22,7 +36,7 @@ if (isset($_POST['upload_review_image'])) {
 //     $allfiles = array();
 
 //     foreach ($file as $currentFile) {
-//         $validExtensions = array("jpg", "png", "gif", "JPG", "JPEG");
+//         $validExtensions = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
 //         $currentFile->setValidExtensions($validExtensions, 'accept');
 
 //         if (PEAR::isError($currentFile)) {
@@ -61,7 +75,7 @@ function uploadReviewFile($post) {
     $defaultImage = '../admincontent/review/default-pic.jpg';  // Path to your default image
 
     foreach ($file as $currentFile) {
-        $validExtensions = array("jpg", "png", "gif", "JPG", "JPEG");
+        $validExtensions = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
         $currentFile->setValidExtensions($validExtensions, 'accept');
 
         if (PEAR::isError($currentFile)) {
@@ -113,7 +127,12 @@ if (isset($_POST['review_save_btn'])) {
         $done = $stmt->execute([$name, $title, $country, $comment, $image['name'], $image['path']]);
         if ($done) {
             $save_msg = CommonBase::createMassageDiv('suc', 'Successfully added', 'Review added successfully.', 200);
-            CommonBase::SendRedirect(CommonBase::appendGettoURL("save_msg", CommonBase::encrypt($save_msg)));
+            // Flashed via session, not the URL: the "encrypted" query-string
+            // value is a fixed-key reversible cipher an attacker can forge
+            // off-site, so anything echoed from it must never be trusted as
+            // pre-built HTML (see CommonBase::encrypt()).
+            $_SESSION['_flash_save_msg'] = $save_msg;
+            CommonBase::SendRedirect("review_add.php");
         }
     }
 }
@@ -127,7 +146,7 @@ if (isset($_POST['review_edit_btn'])) {
         $error = true;
     } else {
         $now = CommonBase::getcurrenttime();
-        $query = "UPDATE review SET fullname = ?, title = ?, country = ?, comment = ?, image_path = ? WHERE Id = ?";
+        $query = "UPDATE review SET customer_name = ?, title = ?, country = ?, comment = ? WHERE Id = ?";
         $stmt = $dbh->prepare($query);
         $done = $stmt->execute([$name, $title, $country, $comment, $reviewID]);
         if ($done) {

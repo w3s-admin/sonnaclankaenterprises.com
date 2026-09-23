@@ -326,7 +326,7 @@ class Carsale {
         $cdb = new ControlPadDB();
         $dbh = $cdb->dbh;
         $stmt = $dbh->prepare("SELECT `name`,price from carsales_component_price");
-        $stmt->execute(array($Id));
+        $stmt->execute();
         $a = array();
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $a[$row['name']] = $row['price'];

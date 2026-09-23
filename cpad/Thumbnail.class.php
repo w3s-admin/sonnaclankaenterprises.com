@@ -188,6 +188,19 @@ class Thumbnail {
 	    			$this->img["src"] = ImageCreateFromPNG ($imgfile);
                     $this->img["des"] =  $this->img["src"];
   	    		break;
+	    		case 18:
+	    			// WEBP - very common now from phone screenshots/exports
+	    			// and camera apps; this class silently rejected it before,
+	    			// with no explanation surfaced anywhere the uploader could
+	    			// see.
+	    			$this->img["format"]="JPEG";
+	    			$this->img["src"] = function_exists('imagecreatefromwebp') ? ImageCreateFromWebP($imgfile) : false;
+	    			if (!$this->img["src"]) {
+	    				$this->error_msg="Not Supported File";
+	    				return false;
+	    			}
+                    $this->img["des"] =  $this->img["src"];
+  	    		break;
 	    		default:
 	                $this->error_msg="Not Supported File";
 	 				return false;
@@ -324,13 +337,25 @@ class Thumbnail {
             $this->error_msg='Not Save File';
             return false;
         }
+        if (empty($this->img["des"]) || !($this->img["des"] instanceof \GdImage)) {
+            // Constructor failed (unsupported/invalid source file) and its
+            // error was silently dropped by PHP ignoring a constructor's
+            // return value - previously save() still reported success here,
+            // letting a non-image upload (or one with a corrupt/unsupported
+            // format) persist under the web root with nothing left to catch it.
+            $this->error_msg = 'Not Supported File';
+            return false;
+        }
         if ($this->output_format=="PNG") { //PNG
-    	    imagePNG($this->img["des"],"$save");
+    	    $ok = imagePNG($this->img["des"],"$save");
     	} else {
            imageinterlace( $this->img["des"], $this->jpeg_progressive);
-           imageJPEG($this->img["des"],"$save",$this->quality);
+           $ok = imageJPEG($this->img["des"],"$save",$this->quality);
         }
-        return true;
+        if (!$ok) {
+            $this->error_msg = 'Failed to write image file';
+        }
+        return $ok;
 	}
 
     /**

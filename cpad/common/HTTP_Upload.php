@@ -628,7 +628,21 @@ class HTTP_Upload_File extends HTTP_Upload_Error
                 break;
             case 'real':
 				$name = "[" . $this->nameToUniq() . "]";
-                $name = $name . "-" . $this->upload['real'];
+                // Sanitize the original client filename before appending it:
+                // previously the full original name was kept byte-for-byte,
+                // so e.g. "shell.php.jpg" (passes an extension allow-list
+                // checked against the LAST extension) would be written to
+                // disk with the ".php." still embedded in the middle of the
+                // filename. Strip it down to base-name + a single trailing
+                // extension so a crafted double extension can't survive.
+                $realName = $this->upload['real'];
+                $dotPos = strrpos($realName, '.');
+                $baseName = ($dotPos !== false) ? substr($realName, 0, $dotPos) : $realName;
+                $extension = ($dotPos !== false) ? substr($realName, $dotPos + 1) : '';
+                $baseName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $baseName);
+                $extension = preg_replace('/[^a-zA-Z0-9]/', '', $extension);
+                $safeReal = $extension !== '' ? ($baseName . '.' . $extension) : $baseName;
+                $name = $name . "-" . $safeReal;
                 break;
             default:
                 $name = $mode;
@@ -842,13 +856,21 @@ class HTTP_Upload_File extends HTTP_Upload_Error
     {
         $exts = $this->_extensions_check;
         settype($exts, 'array');
+        // Case-insensitive comparison: callers list extensions like
+        // array("jpg", "png", "gif", "JPG", "JPEG") - an inconsistent mix
+        // that happens to cover a few cases (jpg/JPG/JPEG) but not others
+        // (png/PNG, gif/GIF, jpeg lowercase), so an ordinary photo named
+        // e.g. "photo.jpeg" or "photo.PNG" (very common from phones,
+        // screenshots, some cameras) was being silently rejected.
+        $exts = array_map('strtolower', $exts);
+        $ext = strtolower((string) $this->getProp('ext'));
         if ($this->_extensions_mode == 'deny') {
-            if (in_array($this->getProp('ext'), $exts)) {
+            if (in_array($ext, $exts)) {
                 return false;
             }
         // mode == 'accept'
         } else {
-            if (!in_array($this->getProp('ext'), $exts)) {
+            if (!in_array($ext, $exts)) {
                 return false;
             }
         }

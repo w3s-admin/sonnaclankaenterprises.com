@@ -1,9 +1,28 @@
 <?
 require_once '../cpad/emailController.php';
 CommonBase::IsAdminUser();
+
+// Newsletter tools parked for now - see newsletter_add_emails.php.
+include './inc/feature_disabled.php';
+
 extract($_GET);
 $name = $name ?? null;
 $email = $email ?? null;
+// email_msg is rendered as raw HTML below, so it must only ever come from a
+// message this file built itself (via the session flash) - never from the
+// query string, which extract($_GET) would otherwise let a crafted link
+// control directly.
+if (!empty($_SESSION['_flash_email_msg'])) {
+    $email_msg = $_SESSION['_flash_email_msg'];
+    unset($_SESSION['_flash_email_msg']);
+} else {
+    $email_msg = null;
+}
+$del_msg = null;
+if (!empty($_SESSION['_flash_del_msg'])) {
+    $del_msg = $_SESSION['_flash_del_msg'];
+    unset($_SESSION['_flash_del_msg']);
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -114,7 +133,7 @@ $email = $email ?? null;
 
             });</script>
 
-        <?= (isset($del_msg)) ? CommonBase::decrypt($del_msg) : "" ?>
+        <?= ($del_msg != null) ? $del_msg : "" ?>
     </head>
 
     <body>

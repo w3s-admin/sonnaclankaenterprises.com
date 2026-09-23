@@ -61,8 +61,8 @@
     <div class="container">
         <div class="cta-modern-inner" data-motion="reveal">
             <span class="brand-eyebrow">Trusted Exporter</span>
-            <h2>Your Trusted Source For Quality Japanese Cars</h2>
-            <p>One of the region's leading exporters of Japanese vehicles — full inspection reports, transparent pricing, and worldwide shipping handled end-to-end.</p>
+            <h2>Your Trusted Source For Quality Cars</h2>
+            <p>One of the region's leading vehicle exporters — full inspection reports, transparent pricing, and worldwide shipping handled end-to-end.</p>
             <div class="cta-modern-btns">
                 <a href="./contact.php" class="btn-brand btn-brand-primary">Contact Us</a>
                 <a href="./used_japanese_vehicles.php" class="btn-brand btn-brand-outline">Browse Stock</a>

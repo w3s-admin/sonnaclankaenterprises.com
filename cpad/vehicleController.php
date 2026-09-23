@@ -14,11 +14,128 @@ require_once 'clsFrontVehicle.php';
 $myCon = new ControlPadDB;
 
 $dbh = $myCon->dbh;
-extract($_POST);
-extract($_GET);
 
+// The site now only prices in Rs, so there's nothing for the admin to pick -
+// this resolves the one active price_type row server-side instead of
+// depending on a form field (see the Price Type dropdown removed from
+// vehicle_add.php/vehicle_edit.php/vehicle_sell.php).
+function getDefaultPriceTypeId($dbh) {
+    static $id = null;
+    if ($id === null) {
+        $row = $dbh->query("SELECT Id FROM price_type WHERE status = 1 ORDER BY Id ASC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+        $id = $row ? (int) $row['Id'] : null;
+    }
+    return $id;
+}
 
+// Every action this file handles below (add/edit/delete vehicle, image and
+// document management, sale/customer assignment, internal search) is an
+// admin-only mutation or admin-only internal lookup. This file is loaded
+// unconditionally by public-facing pages (for the Vehicle/FrontVehicle
+// classes and $dbh), so a hard authentication gate is required here -
+// scoped to POST requests and the recognised admin-only GET actions only,
+// so a normal anonymous page view (a GET request with none of these keys)
+// is completely unaffected.
+$isAdminOnlyRequest = ($_SERVER['REQUEST_METHOD'] === 'POST') || isset($_GET['carsale_search']);
+if ($isAdminOnlyRequest) {
+    CommonBase::IsAdminUser();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        CommonBase::requireValidCsrf();
+    }
+}
 
+// These are rendered as raw, unescaped HTML by the admin pages that include
+// this controller. Pre-declaring them means extract(..., EXTR_SKIP) below
+// will never let a crafted query string / form field set them directly -
+// they can only end up populated by this file's own trusted code further
+// down (which builds them from CommonBase::createMassageDiv()/createnotify(),
+// not from raw request input).
+$shop_save_msg = null;
+$pro_save_msg = null;
+$del_msg = null;
+$shop_del_msg = null;
+$email_msg = null;
+$errmsg = null;
+
+extract($_POST, EXTR_SKIP);
+extract($_GET, EXTR_SKIP);
+
+// Unchecked checkboxes (so, ho, ac, ps, pw, pm, abs, tv, cd, dvd, alloy,
+// airbag, r_camera, foglamp, sunroof, leather, wm, rw, sk, reg) are simply
+// absent from $_POST - standard HTML form behavior, not a bug - and several
+// other fields are only present on some of this file's request types. On
+// PHP 8 that turns into a screenful of "Undefined variable" warnings on
+// every submit (harmless to the actual save, but they were always there;
+// PHP 8 just stopped staying quiet about it). `??=` fills each with null
+// without ever overriding a value that WAS submitted.
+$Stock ??= null;
+$vtype ??= null;
+$Make ??= null;
+$Model ??= null;
+$Modeltxt ??= null;
+$BodyType ??= null;
+$Chasi ??= null;
+$fk_engine_capacity ??= null;
+$Transmission ??= null;
+$FuelType ??= null;
+$BaseColur ??= null;
+$ActualColour ??= null;
+$Grade ??= null;
+$ym ??= null;
+$km ??= null;
+$Price ??= null;
+$Category ??= null;
+$reg ??= null;
+$reg_num ??= null;
+$so ??= null;
+$so_price ??= null;
+$ho ??= null;
+$ac ??= null;
+$ps ??= null;
+$pw ??= null;
+$pm ??= null;
+$abs ??= null;
+$tv ??= null;
+$cd ??= null;
+$dvd ??= null;
+$alloy ??= null;
+$airbag ??= null;
+$r_camera ??= null;
+$foglamp ??= null;
+$sunroof ??= null;
+$leather ??= null;
+$wm ??= null;
+$rw ??= null;
+$sk ??= null;
+$Options ??= null;
+$ref ??= null;
+$price_type ??= null;
+$fk_mileage ??= null;
+$sellp ??= null;
+$img_id ??= null;
+$imgt ??= null;
+$customerId ??= null;
+$sp ??= null;
+$invprice ??= null;
+$search ??= null;
+$searchtext ??= null;
+$con_uncon ??= null;
+$carsale ??= null;
+$key ??= null;
+$chasi ??= null;
+$id ??= null;
+$std ??= null;
+$ed ??= null;
+$ref_cl ??= null;
+$docId ??= null;
+$name ??= null;
+$Id ??= null;
+$adId ??= null;
+$editbtn ??= null;
+$vid ??= null;
+$viddel ??= null;
+$ys ??= null;
+$ye ??= null;
 
 
 if (isset($_POST['carsale_addvehicle'])) {
@@ -58,10 +175,10 @@ $EngineCapacity = CommonBase::decrypt(${'fk_engine_capacity'});
                         $type = 'err', $headding = "Please Add Special Offer Tick !", $massage = '', 100);
     } else {
         $allfiles = $allfiles ?? array();
-        $img1 = ($allfiles[0] == null ) ? "na.jpg" : $allfiles[0];
-        $img2 = ($allfiles[1] == null ) ? "na.jpg" : $allfiles[1];
-        $img3 = ($allfiles[2] == null ) ? "na.jpg" : $allfiles[2];
-        $img4 = ($allfiles[3] == null ) ? "na.jpg" : $allfiles[3];
+        $img1 = $allfiles[0] ?? "na.jpg";
+        $img2 = $allfiles[1] ?? "na.jpg";
+        $img3 = $allfiles[2] ?? "na.jpg";
+        $img4 = $allfiles[3] ?? "na.jpg";
         $imgp = "admincontent/vimg/";
         $keywd =
                 Vehicle::getname(CommonBase::decrypt($vtype), "type") . ", " .
@@ -128,7 +245,7 @@ $EngineCapacity = CommonBase::decrypt(${'fk_engine_capacity'});
             $ref,
             CommonBase::decrypt($Category),
             $reg_num,
-            CommonBase::decrypt($price_type),
+            getDefaultPriceTypeId($dbh),
             $so,
             $so_price,
             CommonBase::decrypt($fk_mileage),
@@ -153,7 +270,7 @@ if (isset($_POST['v_save_image'])) {
         $allfiles = array();
         $fcount = FALSE;
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif", "JPG", "JPEG");
+            $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -169,7 +286,7 @@ if (isset($_POST['v_save_image'])) {
                 $dest_name = $currentFile->moveTo($dest_dir);
                 if (PEAR::isError($dest_name)) {
                     //  $this->setError($dest_name->getMessage());
-                    var_dump($dest_name->getMessage());
+                    error_log('File upload error: ' . $dest_name->getMessage());
                 } else {
                     $realname = $currentFile->getProp('real');
                     $imgfullPath = $dest_dir . $dest_name;
@@ -181,6 +298,18 @@ if (isset($_POST['v_save_image'])) {
             } else {
                 //no file
             }
+        }
+
+        if (empty($allfiles)) {
+            // Previously silent: a rejected/failed upload (wrong file type,
+            // nothing selected, move-to-disk failure) left $allfiles empty,
+            // so the code below - which only ever reports success and only
+            // runs inside a loop over $allfiles - had nothing to say, and
+            // the page just re-rendered with no indication anything went
+            // wrong. Surface it instead of leaving the admin guessing.
+            $shop_save_msg = CommonBase::createMassageDiv(
+                    $type = 'err', $headding = 'Image Not Saved',
+                    $massage = 'No image was uploaded. Check that a file was selected and that it is a JPG, PNG, GIF or WEBP.', 150);
         }
 
         $stmt = $dbh->prepare("Insert into advert_images(fk_advert,image_name,mpath,tpath,`_status`) VALUES(?,?,?,?,1)");
@@ -219,7 +348,11 @@ if (isset($_POST['v_save_image'])) {
                     $shop_save_msg = CommonBase::createMassageDiv(
                                     $type = 'suc', $headding = 'Successfully Add Image', $massage = 'Advert Image adding successfully finished ', 0);
                 } else {
-                    CommonBase::SendRedirect("vehicle_add.php?shop_save_msg=" . CommonBase::encrypt($shop_save_msg));
+                    // Session flash, not the URL - see CommonBase::encrypt()
+                    // for why a query-string-carried "encrypted" HTML blob
+                    // is forgeable and must never be trusted as safe markup.
+                    $_SESSION['_flash_shop_save_msg'] = $shop_save_msg;
+                    CommonBase::SendRedirect("vehicle_add.php");
                 }
             }
         }
@@ -228,6 +361,11 @@ if (isset($_POST['v_save_image'])) {
 
 if (isset($_POST['carsale_editvehicle'])) {
     $vid_d = CommonBase::decrypt($vid);
+    // Was only ever computed in the Add Vehicle block above, never here -
+    // every edit-save hit "$EngineCapacity == null" in the validation below
+    // and failed with "Invalid Fields !" regardless of what was actually
+    // submitted, since the variable was always undefined on this code path.
+    $EngineCapacity = CommonBase::decrypt($fk_engine_capacity);
     if (!is_numeric(CommonBase::decrypt($vtype)) ||
             !is_numeric($vid_d) ||
             $Stock == null ||
@@ -245,7 +383,6 @@ if (isset($_POST['carsale_editvehicle'])) {
             $km == null ||
             ($km != null && !is_numeric($km)) ||
             ($ho != "1" && $Price == null) ||
-            ($ho != "1" && $price_type == null) ||
             ($reg == "1" && $reg_num == null)
     ) {
         $pro_save_msg =
@@ -334,7 +471,7 @@ if (isset($_POST['carsale_editvehicle'])) {
             $ref,
             CommonBase::decrypt($Category),
             $reg_num,
-            CommonBase::decrypt($price_type),
+            getDefaultPriceTypeId($dbh),
             $so,
             $so_price,
             CommonBase::decrypt($fk_mileage),
@@ -366,7 +503,8 @@ if (isset($_POST['del_adv'])) {
         $shop_del_msg = CommonBase:: createnotify($type = 'error', $headding = 'Deleted Successfully !', $massage = '', $hide = 'true');
 
         if ($done) {
-            CommonBase::SendRedirect(CommonBase::appendGettoURL("del_msg" , CommonBase::encrypt($shop_del_msg)));
+            $_SESSION['_flash_del_msg'] = $shop_del_msg;
+            CommonBase::SendRedirect("vehicle_manager.php");
         }
     }
 }
@@ -398,7 +536,7 @@ if (isset($_POST['updateImage'])) {
         $allfiles = array();
         $fcount = FALSE;
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif", "JPG", "JPEG");
+            $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -414,7 +552,7 @@ if (isset($_POST['updateImage'])) {
                 $dest_name = $currentFile->moveTo($dest_dir);
                 if (PEAR::isError($dest_name)) {
                     //  $this->setError($dest_name->getMessage());
-                    var_dump($dest_name->getMessage());
+                    error_log('File upload error: ' . $dest_name->getMessage());
                 } else {
                     $realname = $currentFile->getProp('real');
                     $imgfullPath = $dest_dir . $dest_name;
@@ -512,7 +650,7 @@ if (isset($_POST['remove_other_img'])) {
         $v = Vehicle::getOtherImgeById($vid_d);
         $p_imgp = $v['image_path'];
         $image = $v['image_name'];
-        $img = ($allfiles[0] == null ) ? "na.jpg" : $allfiles[0];
+        $img = $allfiles[0] ?? "na.jpg";
         $quary = "update extra_images set `_status` = 0 WHERE `Id`= ?";
 
         $del_imgurl = "../" . $p_imgp . $image;
@@ -533,7 +671,7 @@ if (isset($_POST['changimages_other'])) {
     $allfiles = array();
     $fcount = FALSE;
     foreach ($file as $currentFile) {
-        $t = array("jpg", "png", "gif", "JPG", "JPEG");
+        $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
         //$currentFile->_chmod
         $currentFile->setValidExtensions($t, $mode = 'accept');
         if (PEAR::isError($currentFile)) {
@@ -563,14 +701,14 @@ if (isset($_POST['changimages_other'])) {
 
     $vid_d = CommonBase::decrypt($img_id);
     if (!is_numeric($vid_d) ||
-            $allfiles[0] == null
+            ($allfiles[0] ?? null) == null
     ) {
         echo CommonBase::jsAlert("invalid Fields !");
     } else {
         $v = Vehicle::getOtherImgeById($vid_d);
         $p_imgp = $v['image_path'];
         $image = $v['image_name'];
-        $img = ($allfiles[0] == null ) ? "na.jpg" : $allfiles[0];
+        $img = $allfiles[0] ?? "na.jpg";
         $quary = "update extra_images set image_name = ? WHERE `Id`= ?";
         $del_imgurl = "../" . $p_imgp . $image;
         $stmt = $dbh->prepare($quary);
@@ -591,7 +729,7 @@ if (isset($_POST['add_otherImages'])) {
     $allfiles = array();
     $fcount = FALSE;
     foreach ($file as $currentFile) {
-        $t = array("jpg", "jpeg", "JPG", "JPEG");
+        $t = array("jpg", "jpeg", "webp", "JPG", "JPEG");
         //$currentFile->_chmod
         $currentFile->setValidExtensions($t, $mode = 'accept');
         if (PEAR::isError($currentFile)) {
@@ -621,12 +759,12 @@ if (isset($_POST['add_otherImages'])) {
 
     $vid_d = CommonBase::decrypt($vid);
     if (!is_numeric($vid_d) ||
-            $allfiles[0] == null
+            ($allfiles[0] ?? null) == null
     ) {
         echo CommonBase::jsAlert("No Image Selected !");
     } else {
 
-        $img = ($allfiles[0] == null ) ? "na.jpg" : $allfiles[0];
+        $img = $allfiles[0] ?? "na.jpg";
         $quary = "insert into extra_images(image_name,`_status`,fk_advert) VALUES(?,1,?)";
         $stmt = $dbh->prepare($quary);
         foreach ($allfiles as $file) {
@@ -702,7 +840,7 @@ if (isset($_POST['adddoc'])) {
     $allfiles = array();
     $fcount = FALSE;
     foreach ($file as $currentFile) {
-        $t = array("jpg", "png", "gif", "zip", "doc", "docx", "xls", "xlsx", "pdf", "xps");
+        $t = array("jpg", "png", "gif", "webp", "zip", "doc", "docx", "xls", "xlsx", "pdf", "xps");
         //$currentFile->_chmod
         $currentFile->setValidExtensions($t, $mode = 'accept');
         if (PEAR::isError($currentFile)) {
@@ -735,7 +873,7 @@ if (isset($_POST['adddoc'])) {
         $vid_d = CommonBase::decrypt($vid);
         if (!is_numeric($vid_d) ||
                 $name == "" ||
-                $allfiles[0] == null
+                ($allfiles[0] ?? null) == null
         ) {
             echo CommonBase::jsAlert("invalid Fields !");
         } else {
@@ -896,7 +1034,7 @@ if (isset($_POST['changimages'])) {
     $allfiles = array();
     $fcount = FALSE;
     foreach ($file as $currentFile) {
-        $t = array("jpg", "png", "gif", "JPG", "JPEG");
+        $t = array("jpg", "png", "gif", "webp", "JPG", "JPEG");
         //$currentFile->_chmod
         $currentFile->setValidExtensions($t, $mode = 'accept');
         if (PEAR::isError($currentFile)) {
@@ -927,14 +1065,14 @@ if (isset($_POST['changimages'])) {
     $vid_d = CommonBase::decrypt($vid);
     if (!is_numeric($vid_d) ||
             $imgt == null ||
-            $allfiles[0] == null
+            ($allfiles[0] ?? null) == null
     ) {
         echo CommonBase::jsAlert("invalid Fields !");
     } else {
         $v = Vehicle::getVehicle($vid_d);
         $p_imgp = $v['imgpath'];
         $p_image = "";
-        $img = ($allfiles[0] == null ) ? "na.jpg" : $allfiles[0];
+        $img = $allfiles[0] ?? "na.jpg";
         $quary = "";
         if ($imgt == 1) {
             $quary = "update advert set image1 =? WHERE `Id`= ?";
@@ -1084,7 +1222,7 @@ if (isset($_POST['addins2'])) {
     } else {
 
         foreach ($file as $currentFile) {
-            $t = array("jpg", "png", "gif");
+            $t = array("jpg", "png", "gif", "webp");
             //$currentFile->_chmod
             $currentFile->setValidExtensions($t, $mode = 'accept');
             if (PEAR::isError($currentFile)) {
@@ -1100,7 +1238,7 @@ if (isset($_POST['addins2'])) {
                 $dest_name = $currentFile->moveTo($dest_dir);
                 if (PEAR::isError($dest_name)) {
                     //  $this->setError($dest_name->getMessage());
-                    var_dump($dest_name->getMessage());
+                    error_log('File upload error: ' . $dest_name->getMessage());
                 } else {
                     $realname = $currentFile->getProp('real');
                     $vid = $myCon->escapeString(CommonBase::decrypt($vid));

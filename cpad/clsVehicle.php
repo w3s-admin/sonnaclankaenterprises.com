@@ -72,7 +72,9 @@ class Vehicle {
 
     public static function createUrl($row, $name = 0) {
         $page = "used-japanese-vehicle-details.php";
-        return CommonBase::getServer() . "/" . $page . "?id=" . CommonBase::encrypt($row['Id']);
+        // CommonBase::getServer() already ends in "/" - the extra "/" here
+        // produced a double slash in every vehicle link site-wide.
+        return CommonBase::getServer() . $page . "?id=" . CommonBase::encrypt($row['Id']);
         $make = trim(str_replace(" ", "-", Vehicle::getname($row['fk_make'], "make")));
         $year = trim(explode("-",  $row['yearmonth'])[0]);
         $year = $year;
@@ -88,12 +90,22 @@ class Vehicle {
         return CommonBase::getServer() . "/" . CommonBase::encrypt($row['Id']) . "/$year-$make-$model-$gear.html";
     }
 
-    public static function getAll_vehicle_search($get_arr, $quary_ser = false) {
+    // $includeSold: the PUBLIC listing pages (new_vehicles.php,
+    // used_japanese_vehicles.php) must default to false - a sold vehicle
+    // should disappear from what customers browse, per
+    // docs/03-managing-vehicles.md. The ADMIN Vehicle Manager is the master
+    // inventory list and is documented as showing "every vehicle currently
+    // in the system (whether sold or not)", so it passes true here to see
+    // everything, same as before this flow filter existed.
+    public static function getAll_vehicle_search($get_arr, $quary_ser = false, $includeSold = false) {
         $Stock = $Category = $Make = $Model = $BodyType = $Transmission = $FuelType = $BaseColur = null;
         $ys = $ye = $key = $chasi = $id = $std = $ed = null;
         extract($get_arr);
 
         $q = " select a.* from advert a WHERE a.status = 1 ";
+        if (!$includeSold) {
+            $q .= " and a.flow = 1 ";
+        }
         $value = array();
 
         if ($Stock != null) {
@@ -308,10 +320,14 @@ class Vehicle {
         return $stmt;
     }
 
+    // Public-facing lookup only (used-japanese-vehicle-details.php) - the
+    // admin edit/sell pages use Vehicle::getVehicle() below instead, which
+    // deliberately has no flow filter so a sold vehicle can still be viewed
+    // and unsold from the admin panel.
     public static function getvehicleByID($id) {
         $cdb = new ControlPadDB();
         $dbh = $cdb->dbh;
-        $stmt = $dbh->prepare("SELECT * FROM advert WHERE `Id` = ? and status = 1");
+        $stmt = $dbh->prepare("SELECT * FROM advert WHERE `Id` = ? and status = 1 and flow = 1");
         $stmt->execute(array($id));
         if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             return $row;
@@ -495,7 +511,8 @@ class Vehicle {
     public static function getLetestVehicles($count) {
         $cdb = new ControlPadDB();
         $dbh = $cdb->dbh;
-        $stmt = $dbh->prepare("SELECT * from advert WHERE status = 1 ORder by ref desc Limit $count");
+        $count = (int) $count;
+        $stmt = $dbh->prepare("SELECT * from advert WHERE status = 1 and flow = 1 ORder by ref desc Limit $count");
         $stmt->execute();
         return $stmt;
     }

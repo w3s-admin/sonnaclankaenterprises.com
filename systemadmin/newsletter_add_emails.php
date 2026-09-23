@@ -3,6 +3,13 @@ require_once '../cpad/emailController.php';
 require_once '../cpad/vehicleController.php';
 CommonBase::IsAdminUser();
 
+// Newsletter tools parked for now (they were never linked from the sidebar
+// to begin with - see docs/06-newsletter-emails.md). Left in place, not
+// deleted, so this can be switched back on later by removing this block.
+include './inc/feature_disabled.php';
+
+$del_msg = null;
+
 $all_emais = Emails::getallemails(1);
 $all_seleced = Emails::getallemails(2);
 $totel_emails = Emails::getallemails_count(3);
@@ -97,9 +104,7 @@ $none_selected_emails = Emails::getallemails_count(1);
 
             });</script>
 
-        <?= (isset($del_msg)) ? CommonBase::decrypt($del_msg) : "" ?>
         <?= (isset($email_msg)) ? $email_msg : "" ?>
-        <?= (isset($_GET['email_msg'])) ? CommonBase::decrypt($_GET['email_msg']) : "" ?>
         <style type="text/css" >
             .dataTables_wrapper .dataTables_filter{
                 float: left;

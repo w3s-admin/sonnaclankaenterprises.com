@@ -1,6 +1,7 @@
 <?
 require_once '../cpad/clsCommonBase.php';
 require_once '../cpad/clsVehicle.php';
+require_once '../cpad/clsInquiry.php';
 
 CommonBase::IsAdminUser();
 
@@ -11,6 +12,8 @@ $inStockCount = (int) $dbh->query("SELECT COUNT(*) FROM advert WHERE status = 1 
 $soldCount = (int) $dbh->query("SELECT COUNT(*) FROM advert WHERE flow = 2")->fetchColumn();
 $reviewCount = (int) $dbh->query("SELECT COUNT(*) FROM review WHERE status = 1")->fetchColumn();
 $staffCount = (int) $dbh->query("SELECT COUNT(*) FROM system_admin WHERE _status = 1")->fetchColumn();
+$inquiryUnreadCount = Inquiry::getUnreadCount();
+$recentInquiries = Inquiry::getRecent(5);
 
 $recentStmt = $dbh->query("SELECT Id, modeltxt, fk_make, fk_model, price, status, flow, addt FROM advert WHERE status = 1 ORDER BY Id DESC LIMIT 6");
 $recentVehicles = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -104,6 +107,13 @@ foreach ($monthLabels as $i => $lbl) {
                                     <div class="kpi-label">Staff Accounts</div>
                                 </div>
                             </div>
+                            <a href="inquiry_manager.php" class="kpi-card<?= $inquiryUnreadCount > 0 ? ' gold' : '' ?>" style="text-decoration:none;">
+                                <span class="kpi-icon"><i class="icon24 icomoon-icon-mail"></i></span>
+                                <div>
+                                    <div class="kpi-value"><?= $inquiryUnreadCount ?></div>
+                                    <div class="kpi-label">New Inquiries</div>
+                                </div>
+                            </a>
                         </div>
 
                         <div class="row-fluid">
@@ -189,6 +199,49 @@ foreach ($monthLabels as $i => $lbl) {
                                         <a href="user_add.php" class="btn btn-admin-primary">+ Add Staff User</a>
                                         <a href="vehicle_manager.php" class="btn">View Vehicle Manager</a>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="span12">
+                                <div class="admin-card">
+                                    <h4 style="margin-top:0;">Recent Inquiries <a href="inquiry_manager.php" style="float:right; font-size:12.5px;">View All</a></h4>
+                                    <?php if (empty($recentInquiries)): ?>
+                                        <div class="table-empty-state">
+                                            <span class="icon24 icomoon-icon-mail"></span>
+                                            <strong>No inquiries yet</strong>
+                                            <span>Customer inquiries from the public site will show up here.</span>
+                                        </div>
+                                    <?php else: ?>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Name</th>
+                                                <th>Vehicle</th>
+                                                <th>Message</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($recentInquiries as $iq):
+                                                $isUnread = ((int) $iq['status'] === 0);
+                                                $vehicleLabel = $iq['fk_advert']
+                                                    ? trim(($iq['modeltxt'] ?? '') . ' (' . ($iq['chasi'] ?? '') . ')')
+                                                    : 'General';
+                                            ?>
+                                            <tr<?= $isUnread ? ' style="font-weight:bold;"' : '' ?>>
+                                                <td><?= htmlspecialchars($iq['addt'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td><?= htmlspecialchars($iq['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td><?= htmlspecialchars($vehicleLabel, ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td><?= htmlspecialchars(mb_strimwidth($iq['message'] ?? '', 0, 60, '...'), ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td><?= $isUnread ? '<span class="status-badge inactive">New</span>' : '<span class="status-badge active">Read</span>' ?></td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

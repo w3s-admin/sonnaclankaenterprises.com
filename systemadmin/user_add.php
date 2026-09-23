@@ -1,6 +1,10 @@
 <?
 require_once '../cpad/userController.php';
-CommonBase::IsAdminUser("user_curd");
+CommonBase::IsAdminUser('super_admin');
+if (!$shop_save_msg && !empty($_SESSION['_flash_shop_save_msg'])) {
+    $shop_save_msg = $_SESSION['_flash_shop_save_msg'];
+    unset($_SESSION['_flash_shop_save_msg']);
+}
 $shop_save_msg = $shop_save_msg ?? null;
 $fname = $fname ?? null;
 $lname = $lname ?? null;
@@ -9,8 +13,8 @@ $email = $email ?? null;
 $email_password = $email_password ?? null;
 $password = $password ?? null;
 $sadmin = $sadmin ?? null;
-${'contact_number'} = ${'contact_number'} ?? null;
-${'other'} = ${'other'} ?? null;
+$contact_number = $contact_number ?? null;
+$other = $other ?? null;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -136,16 +140,16 @@ ${'other'} = ${'other'} ?? null;
                                         <div class="span12">
                                             
                                             <?= ($shop_save_msg != NULL) ? "$shop_save_msg" : "" ?>
-                                            <?= (isset($_GET['shop_save_msg'])) ? CommonBase::decrypt($_GET['shop_save_msg']) : "" ?></div>
+                                            <?= (isset($_GET['shop_save_msg'])) ? htmlspecialchars(CommonBase::decrypt($_GET['shop_save_msg']), ENT_QUOTES, 'UTF-8') : "" ?></div>
                                         <div class="row-fluid">
-                                           <div class="span6">   
+                                           <div class="span12">
                                             <div>
 
                                             </div><div class="form-row row-fluid">
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 red" for="name">First Name</label>
-                                                        <input class="span6 required" id="fname" name="fname" value="<?= $fname ?>"  type="text" />
+                                                        <input class="span6 required" id="fname" name="fname" value="<?= htmlspecialchars($fname ?? '', ENT_QUOTES, 'UTF-8') ?>"  type="text" />
                                                     </div>
                                                 </div>
                                             </div> 
@@ -153,7 +157,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 red" for="name">Last Name</label>
-                                                        <input class="span6 required" id="lname" name="lname"  value="<?= $lname ?>" type="text" />
+                                                        <input class="span6 required" id="lname" name="lname"  value="<?= htmlspecialchars($lname ?? '', ENT_QUOTES, 'UTF-8') ?>" type="text" />
                                                     </div>
                                                 </div>
                                             </div> 
@@ -161,7 +165,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 " for="name">Contacts</label>
-                                                        <input class="span6" id="contact_number" name="contact_number"  value="<?= ${'contact_number'} ?>" type="text" />
+                                                        <input class="span6" id="contact_number" name="contact_number"  value="<?= htmlspecialchars($contact_number ?? '', ENT_QUOTES, 'UTF-8') ?>" type="text" />
                                                     </div>
                                                 </div>
                                             </div> 
@@ -169,7 +173,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 " for="name">Other</label>
-                                                       <textarea rows="3" id="textarea" name="other" class="span6 uniform"><?= ${'other'} ?></textarea>
+                                                       <textarea rows="3" id="textarea" name="other" class="span6 uniform"><?= htmlspecialchars($other ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                                                     </div>
                                                 </div>
                                             </div> 
@@ -177,7 +181,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 red" for="name">Email</label>
-                                                        <input class="span6 required" id="email" name="email"  value="<?= $email ?>" type="text" />
+                                                        <input class="span6 required" id="email" name="email"  value="<?= htmlspecialchars($email ?? '', ENT_QUOTES, 'UTF-8') ?>" type="text" />
                                                     </div>
                                                 </div>
                                             </div> 
@@ -185,7 +189,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 red" for="name">Email Password</label>
-                                                        <input class="span6 " id="email_password" name="email_password"  value="<?= $email_password ?>" type="text" />
+                                                        <input class="span6 " id="email_password" name="email_password"  value="<?= htmlspecialchars($email_password ?? '', ENT_QUOTES, 'UTF-8') ?>" type="text" />
                                                     </div>
                                                 </div>
                                             </div> 
@@ -193,7 +197,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 red" for="name">User Name</label>
-                                                        <input class="span6 required" id="name" name="uname" value="<?= $uname ?>"   type="text" />
+                                                        <input class="span6 required" id="name" name="uname" value="<?= htmlspecialchars($uname ?? '', ENT_QUOTES, 'UTF-8') ?>"   type="text" />
                                                     </div>
                                                 </div>
                                             </div> 
@@ -201,7 +205,7 @@ ${'other'} = ${'other'} ?? null;
                                                 <div class="span12">
                                                     <div class="row-fluid">
                                                         <label class="form-label span4 red" for="required">Password</label>
-                                                        <input class="span6 required" id="password" name="password" value="<?= $password ?>"   type="text" />
+                                                        <input class="span6 required" id="password" name="password" value="<?= htmlspecialchars($password ?? '', ENT_QUOTES, 'UTF-8') ?>"   type="text" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -216,33 +220,6 @@ ${'other'} = ${'other'} ?? null;
                                                     </div>
                                                 </div>
                                             </div> </div>
-                                        <div class="span6 permissions-panel">
-                                            <?
-                                            $privelage_type = User::get_privilage();
-                                            
-                                            while ($row = $privelage_type->fetch(PDO::FETCH_ASSOC)) {
-                                                ?>
-                                                <div class="span12">
-                                                    <h4> <?= $row['name'] ?> </h4>
-                                                </div>
-                                                <?
-                                                $privelage_pro = User::get_privilage($row['Id']);
-                                                while ($row = $privelage_pro->fetch(PDO::FETCH_ASSOC)) {
-                                                    ?>
-                                                    <div class="form-row row-fluid">
-                                                        <div class="span12">
-                                                            <div class="row-fluid">
-                                                                <label class="form-label span5 " for="phone"><?= $row['name'] ?></label>
-                                                                <div class="left marginR10">
-                                                                    <input type="checkbox" id="<?= "pro_" . $row['Id'] ?>" value="<?= $row['Id'] ?>" name="<?= "pro_" . $row['Id'] ?>" <?= CommonBase::checked_value(${"pro_" . $row['Id']} ?? null) ?>  class="ibutton nostyle" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                <? } ?>
-                                            <? } ?>
-                                        </div>
-                                            
                                         </div>
                                         
                                         

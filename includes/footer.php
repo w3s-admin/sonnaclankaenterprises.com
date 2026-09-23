@@ -159,7 +159,7 @@
         <div class="footer-columns" data-motion="reveal">
             <div class="footer-brand-col">
                 <a href="index.php"><img src="assets/img/logo/sonnac-lanka-logo-nav.webp" alt="Sonnac Lanka Enterprises"></a>
-                <p>Trusted exporter of quality Japanese vehicles — fully inspected, transparently priced, shipped worldwide.</p>
+                <p>Trusted exporter of quality vehicles — fully inspected, transparently priced, shipped worldwide.</p>
                 <div class="footer-social">
                     <a href="https://www.facebook.com/sonnacbidding" target="_blank" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
                 </div>

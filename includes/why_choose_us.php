@@ -94,7 +94,7 @@
             <div class="why-card" data-motion="grid-item">
                 <span class="why-index">02</span>
                 <span class="why-icon"><i class="ri-map-pin-line"></i></span>
-                <h3>Sourced Direct From Japan</h3>
+                <h3>Sourced Direct From The Source</h3>
                 <p>We buy directly at the source, cutting out unnecessary middlemen and markups.</p>
             </div>
             <div class="why-card" data-motion="grid-item">

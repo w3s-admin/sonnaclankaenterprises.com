@@ -1,6 +1,6 @@
 <?
-require_once '../cpad/userController.php';
-CommonBase::IsAdminUser('super_admin');
+require_once '../cpad/inquiryController.php';
+CommonBase::IsAdminUser();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -17,11 +17,6 @@ CommonBase::IsAdminUser('super_admin');
         <link href="plugins/misc/pnotify/jquery.pnotify.default.css" type="text/css" rel="stylesheet" />
         <script type="text/javascript" src="plugins/misc/pnotify/jquery.pnotify.min.js"></script>
 
-
-        <!-- fancybox -->
-        <link href="plugins/gallery/fancybox/jquery.fancybox.css" type="text/css" rel="stylesheet" />
-        <script type="text/javascript" src="plugins/gallery/fancybox/jquery.fancybox.js"></script>
-
         <script type="text/javascript">
             $(function() {
                 if ($('table').hasClass('dynamicTable_user')) {
@@ -29,27 +24,18 @@ CommonBase::IsAdminUser('super_admin');
                         "sPaginationType": "full_numbers",
                         "bJQueryUI": false,
                         "bAutoWidth": false,
-                       
+                        "aaSorting": [[0, 'desc']],
                         "fnInitComplete": function(oSettings, json) {
-                            $('.dataTables_filter>label>input').attr('id', 'search');
+                            $('.dataTables_filter>label>input').attr('Id', 'search');
                         }
-
                     });
                 }
-
-
-                $(".popup").fancybox({
-                    'width': '65%',
-                    'height': '75%',
-                    'autoScale': false,
-                    'transitionIn': 'none',
-                    'transitionOut': 'none',
-                    'type': 'iframe'
-                });
-
-
             })
         </script>
+        <style>
+            tr.inquiry-unread { font-weight: bold; background: #FFF9E6; }
+            .inquiry-message { max-width: 320px; white-space: normal; }
+        </style>
     </head>
 
     <body>
@@ -62,7 +48,7 @@ CommonBase::IsAdminUser('super_admin');
 
         <div id="wrapper">
 
-            <!--Responsive navigation button-->  
+            <!--Responsive navigation button-->
             <div class="resBtn">
                 <a href="#"><span class="icon16 minia-icon-list-3"></span></a>
             </div>
@@ -75,7 +61,7 @@ CommonBase::IsAdminUser('super_admin');
 
                     <div class="heading">
 
-                        <h3>User Manager</h3>
+                        <h3>Inquiry Manager</h3>
 
                         <div class="resBtnSearch">
                             <a href="#"><span class="icon16 icomoon-icon-search-3"></span></a>
@@ -90,96 +76,88 @@ CommonBase::IsAdminUser('super_admin');
                             <li>
                                 <a href="dashboard.php" class="tip" title="back to dashboard">
                                     <span class="icon16 icomoon-icon-screen-2"></span>
-                                </a> 
+                                </a>
                                 <span class="divider">
                                     <span class="icon16 icomoon-icon-arrow-right-2"></span>
                                 </span>
                             </li>
-                            <li class="active">User Manager</li>
+                            <li class="active">Inquiry Manager</li>
                         </ul>
 
                     </div><!-- End .heading-->
 
                     <!-- Build page from here: -->
                     <div class="row-fluid">
-                        <?= (isset($user_delmsg)) ? $user_delmsg : "" ?>
                         <div class="span12">
 
                             <div class="box gradient">
                                 <div class="title">
                                     <h4>
-                                        <span>User List</span>
+                                        <span>Customer Inquiries</span>
                                     </h4>
-
                                 </div>
 
-
                                 <div class="content noPad clearfix">
-
 
                                     <table cellpadding="0" cellspacing="0" border="0" class="responsive dynamicTable_user display table table-bordered" width="100%">
                                         <thead>
                                             <tr>
-
-                                                <th>Id</th>
+                                                <th>Date</th>
                                                 <th>Name</th>
-                                                <th>User Name</th>
                                                 <th>Email</th>
-                                                
-                                                <th>last Login</th>
-                                                <th>last Ip</th>
-
-                                                <th>SAdmin</th>
-
-                                                <th>Edit</th>
+                                                <th>Phone</th>
+                                                <th>Vehicle</th>
+                                                <th>Message</th>
+                                                <th>Status</th>
+                                                <th>Mark Read</th>
                                                 <th>Remove</th>
-
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?
-                                            $users = User::getAllUsers();
-                                            while ($row = $users->fetch(PDO::FETCH_ASSOC)) {
-                                                if ($row['Id'] ==1) {
-                                                    continue;
-                                                }
+                                            $inquiries = Inquiry::getAll();
+                                            while ($row = $inquiries->fetch(PDO::FETCH_ASSOC)) {
+                                                $isUnread = ((int) $row['status'] === 0);
+                                                $vehicleLabel = $row['fk_advert']
+                                                    ? trim(($row['modeltxt'] ?? '') . ' (' . ($row['chasi'] ?? '') . ')')
+                                                    : 'General enquiry';
                                                 ?>
-                                                <tr>
-                                                    <td><?= (int) $row['Id'] ?></td>
-                                                    <td><?= htmlspecialchars($row['firstname'] . " " . $row['lastname'], ENT_QUOTES, 'UTF-8') ?></td>
-                                                    <td><?= htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8') ?></td>
-                                                    <td><?= htmlspecialchars($row['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-
-                                                    <td><?= date('Y-m-d H:i:s', strtotime($row['lastLogin'])) ?></td>
-                                                    <td><?= htmlspecialchars($row['lastIp'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-                                                    <td><?= CommonBase::yn_bootsrap($row['super_admin']) ?></td>
-                                                    <td> <a style="float: right;margin: 5px; margin-bottom: 0px; z-index: 999" class="btn btn-warning btn-small popup" 
-                                                            href="user_edit.php?uid=<?= CommonBase::encrypt($row['Id']) ?>">
-                                                            Edit</a></td>
-                                                    <td><form method="POST" action="" style="margin: 0px;">
-                                                            <input type="hidden" value="<?= CommonBase::encrypt($row['Id']) ?>" name="uid" />
-                                                            <button class="btn btn-danger" type="submit" name="del_user"  onclick="return confirm('Are you Sure to Delete ?')" >Delete</button>
-                                                        </form></td>
+                                                <tr<?= $isUnread ? ' class="inquiry-unread"' : '' ?>>
+                                                    <td><?= htmlspecialchars($row['addt'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td><?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td><a href="mailto:<?= htmlspecialchars($row['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($row['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></a></td>
+                                                    <td><?= htmlspecialchars($row['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td><?= htmlspecialchars($vehicleLabel, ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td class="inquiry-message"><?= nl2br(htmlspecialchars($row['message'] ?? '', ENT_QUOTES, 'UTF-8')) ?></td>
+                                                    <td><?= $isUnread ? '<span class="status-badge inactive">New</span>' : '<span class="status-badge active">Read</span>' ?></td>
+                                                    <td>
+                                                        <?php if ($isUnread): ?>
+                                                        <form method="POST" action="" style="margin: 0px;">
+                                                            <input type="hidden" value="<?= CommonBase::encrypt($row['Id']) ?>" name="iid" />
+                                                            <button class="btn btn-small btn-warning" type="submit" name="inquiry_read_btn">Mark Read</button>
+                                                        </form>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <form method="POST" action="" style="margin: 0px;">
+                                                            <input type="hidden" value="<?= CommonBase::encrypt($row['Id']) ?>" name="iid" />
+                                                            <button class="btn btn-small btn-danger" type="submit" name="inquiry_delete_btn" onclick="return confirm('Are you Sure to Delete ?')">Delete</button>
+                                                        </form>
+                                                    </td>
                                                 </tr>
-                                            <? }
-                                            ?>  
+                                            <? } ?>
                                         </tbody>
                                         <tfoot>
                                             <tr>
-
-                                                <th>Id</th>
+                                                <th>Date</th>
                                                 <th>Name</th>
-                                                <th>User Name</th>
                                                 <th>Email</th>
-                                               
-                                                <th>last Login</th>
-                                                <th>last Ip</th>
-
-                                                <th>SAdmin</th>
-
-                                                <th>Edit</th>
+                                                <th>Phone</th>
+                                                <th>Vehicle</th>
+                                                <th>Message</th>
+                                                <th>Status</th>
+                                                <th>Mark Read</th>
                                                 <th>Remove</th>
-
                                             </tr>
                                         </tfoot>
                                     </table>

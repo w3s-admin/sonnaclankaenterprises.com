@@ -105,7 +105,7 @@ $style = $style ?? "";
                           SELECT 1
                           FROM advert a
                           WHERE a.fk_make = m.Id
-                          AND a.status = 1
+                          AND a.status = 1 AND a.flow = 1
                         )
                         ORDER BY m.Id ASC",
                         $columName,
@@ -116,20 +116,30 @@ $style = $style ?? "";
             </div>
             <div class="search-field">
                 <label for="Model"><i class="ri-price-tag-3-line"></i> Model</label>
-                <select id="Model" name="Model" title="Please Select Model">
-                    <?php echo
-                     CommonBase::createSelectAjxSearch(${'Model'}, ${'Make'},
-                     "SELECT m.Id, m.name
-                     FROM model m
-                     WHERE m.fk_make = ?
-                     AND m.status = 1
-                     AND EXISTS (
-                       SELECT 1
-                       FROM advert a
-                       WHERE a.fk_model = m.Id
-                         AND a.status = 1
-                     )", "fk_model", "Any Model"); ?>
-                </select>
+                <!-- Shows every model currently in stock upfront (same as Make/Body
+                     Type/Transmission), scoped down further by the #Make change
+                     handler once a specific Make is picked. -->
+                <?php echo
+                     CommonBase::createSelectSearch(
+                        ${'Model'},
+                        $name = 'Model',
+                        null,
+                        $class = "",
+                        "",
+                        $q = "SELECT mo.Id, mo.name
+                        FROM model mo
+                        WHERE mo.status = 1
+                        AND EXISTS (
+                          SELECT 1
+                          FROM advert a
+                          WHERE a.fk_model = mo.Id
+                          AND a.status = 1 AND a.flow = 1
+                        )
+                        ORDER BY mo.Id ASC",
+                        $columName,
+                        "Any Model",
+                        $style
+                    ); ?>
             </div>
             <div class="search-field">
                 <label for="BodyType"><i class="ri-car-washing-line"></i> Body Type</label>
@@ -147,7 +157,7 @@ $style = $style ?? "";
                           SELECT 1
                           FROM advert a
                           WHERE a.fk_body_type = bt.Id
-                            AND a.status = 1
+                            AND a.status = 1 AND a.flow = 1
                         )
                         ORDER BY bt.Id ASC;",
                         $columName,

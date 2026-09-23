@@ -89,6 +89,7 @@ require_once '../cpad/loginController.php';
                         }
                         ?>
                         <form class="form-horizontal" action="" id="loginForm" method="post">
+                            <?= CommonBase::csrfField() ?>
                             <div class="login-field">
                                 <label for="username">Username</label>
                                 <div class="login-input">

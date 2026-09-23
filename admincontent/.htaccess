@@ -1,0 +1,31 @@
+# admincontent/ holds admin-uploaded files (vehicle images, review photos,
+# staff avatars, documents). This directory must never execute server-side
+# scripts, regardless of what filename/extension an upload ends up with -
+# this is defense-in-depth independent of any upload validation code.
+
+# Apache 2.4+
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(php|php[3457s]?|phtml|pht|phar|cgi|pl|py|asp|aspx|sh|exe)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# Apache 2.2 and earlier
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|php[3457s]?|phtml|pht|phar|cgi|pl|py|asp|aspx|sh|exe)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Belt-and-braces: neutralize PHP execution even if the handler is applied
+# by AddHandler/AddType elsewhere.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>

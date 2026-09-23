@@ -135,16 +135,15 @@ CommonBase::IsAdminUser("user_curd");
                                             while ($row = $reviews->fetch(PDO::FETCH_ASSOC)) {
                                                 ?>
                                                 <tr>
-                                                    <td><?= $row['Id'] ?></td>
-                                                    <td><?= $row['customer_name'] ?></td>
-                                                    <td><?= $row['title'] ?></td>
-                                                    <td><?= $row['country'] ?></td>
-                                                    <td><?= $row['comment'] ?></td>
-                                                   
+                                                    <td><?= (int) $row['Id'] ?></td>
+                                                    <td><?= htmlspecialchars($row['customer_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td><?= htmlspecialchars($row['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td><?= htmlspecialchars($row['country'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td><?= htmlspecialchars($row['comment'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+
                                                     <td>
-                                                        <!-- Need to create the review_edit.php -->
-                                                        <a style="float: right;margin: 5px; margin-bottom: 0px; z-index: 999" class="btn btn-warning btn-small popup" 
-                                                            href="review_edit.php?uid=<?= CommonBase::encrypt($row['Id']) ?>">
+                                                        <a style="float: right;margin: 5px; margin-bottom: 0px; z-index: 999" class="btn btn-warning btn-small popup"
+                                                            href="review_edit.php?rid=<?= CommonBase::encrypt($row['Id']) ?>">
                                                             Edit</a>
                                                     </td>
                                                     <td>

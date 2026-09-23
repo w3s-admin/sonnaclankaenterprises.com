@@ -114,7 +114,7 @@ $stmt = Vehicle::getALLUNSOLD();
                                                 <td><?= $vehicle_details['Id'] ?></td>
                                                 <td><?= Vehicle::getname($vehicle_details['fk_make'], "make") ?></td>
                                                 <td><?= Vehicle::getname($vehicle_details['fk_model'], "model") ?></td>
-                                                <td><?= $vehicle_details['chasi'] ?></td>
+                                                <td><?= htmlspecialchars($vehicle_details['chasi'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                                                 <td><?= Vehicle::getname($vehicle_details['fk_color'], "colour") ?></td>
                                                 <td><?= Vehicle::getname($vehicle_details['fk_transmission'], "transmission"); ?></td>
                                                 <td><?= Vehicle::getname($vehicle_details['fk_body_type'], "body_type"); ?></td>
@@ -125,7 +125,7 @@ $stmt = Vehicle::getALLUNSOLD();
                                                 <td><?= CommonBase::yn($vehicle_details['pm']) ?></td>
                                                 <td><?= $vehicle_details['eng_cap'] ?></td>
                                                 <td><?= CommonBase::formatMoney($vehicle_details['mileage'], 0) ?> Km</td>
-                                                <td><?= $vehicle_details['yearmonth'] ?></td>
+                                                <td><?= htmlspecialchars($vehicle_details['yearmonth'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                                                 <td><?
                                                     if ($vehicle_details['highestoffer'] == 1) {
                                                         echo "Highest offer";
@@ -133,16 +133,13 @@ $stmt = Vehicle::getALLUNSOLD();
                                                         echo Vehicle::getname($vehicle_details['fk_price_type'], "price_type") . " <b>" . CommonBase::formatMoney($vehicle_details['price'], 0) . "</b>";
                                                     }
                                                     ?></td>
-                                                <td><?= $vehicle_details['other_op'] ?>&nbsp;</td>
+                                                <td><?= htmlspecialchars($vehicle_details['other_op'] ?? '', ENT_QUOTES, 'UTF-8') ?>&nbsp;</td>
                                                 <td>
                                                     <?= Vehicle::getname($vehicle_details['fk_category'], "category"); ?>
                                                     <br />
-                                                    <?= ($vehicle_details['registed_number'] != "") ? $vehicle_details['registed_number'] : "" ?>
+                                                    <?= htmlspecialchars($vehicle_details['registed_number'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                                                 </td>
-                                                <td><a href="<?= CommonBase::getServer() ?>/vehicle/<?= CommonBase::encrypt($vehicle_details['Id']) ?>/<?
-                                                    $ym = explode("-", $vehicle_details['yearmonth']);
-                                                    echo $ym[0] . "_" . Vehicle::getname($vehicle_details['fk_make'], "make") . "_" . Vehicle::getname($vehicle_details['fk_model'], "model");
-                                                    ?>.html"><img height="50" width="70" src="<?= CommonBase::getServer() . $img['tpath'] . $img['image_name'] ?>"/></a></td>
+                                                <td><a href="<?= Vehicle::createUrl($vehicle_details) ?>" target="_blank"><img height="50" width="70" src="<?= CommonBase::getServer() . $img['tpath'] . $img['image_name'] ?>"/></a></td>
                                             </tr>
                                             <?php endwhile; ?>
                                         </tbody>
