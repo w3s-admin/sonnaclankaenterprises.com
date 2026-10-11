@@ -226,6 +226,7 @@ class Vehicle {
             return $row;
         }
         if (empty($row)) {
+            $row = array();
             $row['image_name'] = CommonBase::getProperty()['no_image_name'];
             $row['mpath'] = CommonBase::getProperty()['no_image_mpath'];
             $row['tpath'] = CommonBase::getProperty()['no_image_tpath'];
