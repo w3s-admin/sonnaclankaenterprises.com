@@ -11,6 +11,7 @@ $dbh_sonec = $myCon->dbh;
 $time = CommonBase::getcurrenttime();
 
 // "Send_email_friend" is the only public-facing action here (a site visitor
+// "Send_email_friend" is the only public-facing action here (a site visitor
 // emailing a vehicle listing to a friend, gated by its own captcha check
 // below) - every other action in this file (newsletter sending, subscriber
 // list management, admin add/edit/delete of stored emails) is admin-only.
