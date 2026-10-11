@@ -1,5 +1,6 @@
 <?
-require 'cpad/vehicleController.php';
+    //test
+    require 'cpad/vehicleController.php';
 ?>
 <!DOCTYPE html>
 <html lang="zxx" class="theme-dark">
